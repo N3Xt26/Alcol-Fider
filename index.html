@@ -623,6 +623,8 @@
 
       function setMode(mode) {
         currentMode = mode;
+        cachedPlaces = [];
+        lastCacheCoords = null;
         document
           .getElementById("btn-near")
           .classList.toggle("active", mode === "NEAR");
@@ -669,89 +671,10 @@
         }
       }
 
-      async function fetchFromPhoton(lat, lon, minLat, minLon, maxLat, maxLon, radius) {
-        const queries = ["bar", "pub"];
-        const found = [];
-        const seen = new Set();
-        for (const q of queries) {
-          try {
-            const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&bbox=${minLon.toFixed(5)},${minLat.toFixed(5)},${maxLon.toFixed(5)},${maxLat.toFixed(5)}&limit=35`;
-            const res = await fetchWithTimeout(url, {}, 3500);
-            if (!res.ok) continue;
-            const data = await res.json();
-            for (const f of data.features || []) {
-              const coords = f.geometry && f.geometry.coordinates;
-              if (!coords || coords.length < 2) continue;
-              const pLon = coords[0];
-              const pLat = coords[1];
-              const name = f.properties && (f.properties.name || f.properties.street);
-              if (!name) continue;
-              const dist = getDist(lat, lon, pLat, pLon);
-              if (dist <= radius) {
-                const key = `${name.toLowerCase().trim()}_${pLat.toFixed(3)}_${pLon.toFixed(3)}`;
-                if (!seen.has(key)) {
-                  seen.add(key);
-                  found.push({
-                    lat: pLat,
-                    lon: pLon,
-                    name: name,
-                    tags: {
-                      name: name,
-                      amenity: (f.properties && f.properties.osm_value) || q,
-                    },
-                  });
-                }
-              }
-            }
-          } catch (e) {
-            console.warn("Photon query failed for " + q, e);
-          }
-        }
-        return found;
-      }
-
-      async function fetchFromNominatim(lat, lon, minLat, minLon, maxLat, maxLon, radius) {
-        const amenities = ["bar", "pub"];
-        const found = [];
-        const seen = new Set();
-        for (const a of amenities) {
-          try {
-            const url = `https://nominatim.openstreetmap.org/search?format=json&amenity=${encodeURIComponent(a)}&bounded=1&viewbox=${minLon.toFixed(5)},${maxLat.toFixed(5)},${maxLon.toFixed(5)},${minLat.toFixed(5)}&limit=30`;
-            const res = await fetchWithTimeout(url, {}, 3500);
-            if (!res.ok) continue;
-            const list = await res.json();
-            for (const item of list || []) {
-              const pLat = parseFloat(item.lat);
-              const pLon = parseFloat(item.lon);
-              const name = item.name || (item.display_name && item.display_name.split(",")[0]);
-              if (!name || isNaN(pLat) || isNaN(pLon)) continue;
-              const dist = getDist(lat, lon, pLat, pLon);
-              if (dist <= radius) {
-                const key = `${name.toLowerCase().trim()}_${pLat.toFixed(3)}_${pLon.toFixed(3)}`;
-                if (!seen.has(key)) {
-                  seen.add(key);
-                  found.push({
-                    lat: pLat,
-                    lon: pLon,
-                    name: name,
-                    tags: {
-                      name: name,
-                      amenity: item.type || a,
-                    },
-                  });
-                }
-              }
-            }
-          } catch (e) {
-            console.warn("Nominatim query failed for " + a, e);
-          }
-        }
-        return found;
-      }
-
       async function fetchPlaces() {
         const radiusIndex = document.getElementById("radius-slider").value;
-        const radius = radiuses[radiusIndex];
+        const radius = currentMode === "NEAR" ? 2000 : radiuses[radiusIndex];
+
         let useCache = false;
         if (
           cachedPlaces.length > 0 &&
@@ -764,59 +687,19 @@
             lastCacheCoords.lat,
             lastCacheCoords.lon,
           );
-          if (distFromCache < 200) useCache = true;
+          if (distFromCache < 100) useCache = true;
         }
+
         let places = [];
         if (useCache) {
           places = cachedPlaces;
         } else {
-          const dLat = (radius * 1.2) / 111139;
-          const dLon =
-            (radius * 1.2) /
-            (111139 * Math.cos((userCoords.lat * Math.PI) / 180));
-          const minLat = userCoords.lat - dLat;
-          const maxLat = userCoords.lat + dLat;
-          const minLon = userCoords.lon - dLon;
-          const maxLon = userCoords.lon + dLon;
-
           try {
-            // 1. Prova prima con Photon (Komoot/OSM)
-            places = await fetchFromPhoton(
-              userCoords.lat,
-              userCoords.lon,
-              minLat,
-              minLon,
-              maxLat,
-              maxLon,
-              radius,
-            );
+            places = await queryAllPOIs(userCoords.lat, userCoords.lon, radius);
 
-            // 2. Se Photon restituisce pochi risultati, integra con Nominatim
-            if (places.length < 3) {
-              const nomPlaces = await fetchFromNominatim(
-                userCoords.lat,
-                userCoords.lon,
-                minLat,
-                minLon,
-                maxLat,
-                maxLon,
-                radius,
-              );
-              if (nomPlaces.length > 0) {
-                const seen = new Set(
-                  places.map(
-                    (p) =>
-                      `${p.name.toLowerCase()}_${p.lat.toFixed(3)}_${p.lon.toFixed(3)}`,
-                  ),
-                );
-                for (const np of nomPlaces) {
-                  const k = `${np.name.toLowerCase()}_${np.lat.toFixed(3)}_${np.lon.toFixed(3)}`;
-                  if (!seen.has(k)) {
-                    seen.add(k);
-                    places.push(np);
-                  }
-                }
-              }
+            // Se a 2000m non trova nulla in modalità NEAR, espandi la ricerca a 4000m
+            if (places.length === 0 && currentMode === "NEAR") {
+              places = await queryAllPOIs(userCoords.lat, userCoords.lon, 4000);
             }
 
             if (places.length > 0) {
@@ -837,6 +720,103 @@
         } else showError("Nessun locale nel raggio.");
       }
 
+      async function queryAllPOIs(lat, lon, radius) {
+        const dLat = (radius * 1.15) / 111139;
+        const dLon =
+          (radius * 1.15) /
+          (111139 * Math.cos((lat * Math.PI) / 180));
+        const minLat = lat - dLat;
+        const maxLat = lat + dLat;
+        const minLon = lon - dLon;
+        const maxLon = lon + dLon;
+
+        // 1. Nominatim per tag OSM (identifica bar, pub, caffè, birrerie e locali indipendentemente dal nome)
+        const nomAmenities = ["bar", "pub", "cafe", "biergarten"];
+        const nomPromises = nomAmenities.map(async (amenity) => {
+          try {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&amenity=${encodeURIComponent(amenity)}&bounded=1&viewbox=${minLon.toFixed(5)},${maxLat.toFixed(5)},${maxLon.toFixed(5)},${minLat.toFixed(5)}&limit=50`;
+            const res = await fetchWithTimeout(url, {}, 4000);
+            if (!res.ok) return [];
+            const data = await res.json();
+            return (data || []).map((item) => ({
+              lat: parseFloat(item.lat),
+              lon: parseFloat(item.lon),
+              name: item.name || (item.display_name && item.display_name.split(",")[0]),
+              amenity: item.type || amenity,
+            }));
+          } catch (e) {
+            return [];
+          }
+        });
+
+        // 2. Photon per parole chiave e POI complementari
+        const photonQueries = ["bar", "pub", "birreria"];
+        const photonPromises = photonQueries.map(async (q) => {
+          try {
+            const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&bbox=${minLon.toFixed(5)},${minLat.toFixed(5)},${maxLon.toFixed(5)},${maxLat.toFixed(5)}&limit=35`;
+            const res = await fetchWithTimeout(url, {}, 4000);
+            if (!res.ok) return [];
+            const data = await res.json();
+            const list = [];
+            for (const f of data.features || []) {
+              const coords = f.geometry && f.geometry.coordinates;
+              if (!coords || coords.length < 2) continue;
+              const name = f.properties && (f.properties.name || f.properties.street);
+              if (!name) continue;
+              list.push({
+                lat: coords[1],
+                lon: coords[0],
+                name: name,
+                amenity: (f.properties && f.properties.osm_value) || q,
+              });
+            }
+            return list;
+          } catch (e) {
+            return [];
+          }
+        });
+
+        // Esegui tutte le chiamate contemporaneamente in parallelo
+        const responses = await Promise.allSettled([...nomPromises, ...photonPromises]);
+        const allPlaces = [];
+        const seenLocations = [];
+
+        for (const r of responses) {
+          if (r.status === "fulfilled" && Array.isArray(r.value)) {
+            for (const item of r.value) {
+              if (!item.name || isNaN(item.lat) || isNaN(item.lon)) continue;
+              const dist = getDist(lat, lon, item.lat, item.lon);
+              if (dist <= radius) {
+                const normName = item.name.toLowerCase().trim();
+                const isDuplicate = seenLocations.some(
+                  (seen) =>
+                    getDist(seen.lat, seen.lon, item.lat, item.lon) < 15 ||
+                    (seen.name === normName && getDist(seen.lat, seen.lon, item.lat, item.lon) < 100),
+                );
+
+                if (!isDuplicate) {
+                  seenLocations.push({ lat: item.lat, lon: item.lon, name: normName });
+                  allPlaces.push({
+                    lat: item.lat,
+                    lon: item.lon,
+                    name: item.name,
+                    dist: dist,
+                    tags: {
+                      name: item.name,
+                      amenity: item.amenity || "bar",
+                    },
+                  });
+                }
+              }
+            }
+          }
+        }
+
+        // Ordina rigorosamente dal più vicino al più lontano
+        allPlaces.sort((a, b) => a.dist - b.dist);
+        return allPlaces;
+      }
+
       async function finalizeSelection(places, radiusLimit) {
         if (currentMode === "NEAR") {
           let place = getClosest(places);
@@ -845,7 +825,9 @@
           calculateRoute(place);
         } else {
           let validFound = false;
-          let candidates = [...places];
+          let candidates = places.filter((p) => p.dist <= radiusLimit);
+          if (candidates.length === 0) candidates = [...places];
+
           while (candidates.length > 0) {
             const randIdx = Math.floor(Math.random() * candidates.length);
             const place = candidates[randIdx];
@@ -1133,32 +1115,41 @@
       }
 
       function getClosest(elements) {
-        return elements.slice().sort((a, b) => {
-          const aLat = parseFloat(
-            a.lat ??
-              (a.center && a.center.lat) ??
-              (a.geometry && a.geometry.coordinates[1]),
+        if (!elements || elements.length === 0) return null;
+        let closest = elements[0];
+        let minDist = getDist(
+          userCoords.lat,
+          userCoords.lon,
+          parseFloat(
+            closest.lat ??
+              (closest.center && closest.center.lat) ??
+              (closest.geometry && closest.geometry.coordinates[1]),
+          ),
+          parseFloat(
+            closest.lon ??
+              (closest.center && closest.center.lon) ??
+              (closest.geometry && closest.geometry.coordinates[0]),
+          ),
+        );
+        for (let i = 1; i < elements.length; i++) {
+          const el = elements[i];
+          const elLat = parseFloat(
+            el.lat ??
+              (el.center && el.center.lat) ??
+              (el.geometry && el.geometry.coordinates[1]),
           );
-          const aLon = parseFloat(
-            a.lon ??
-              (a.center && a.center.lon) ??
-              (a.geometry && a.geometry.coordinates[0]),
+          const elLon = parseFloat(
+            el.lon ??
+              (el.center && el.center.lon) ??
+              (el.geometry && el.geometry.coordinates[0]),
           );
-          const bLat = parseFloat(
-            b.lat ??
-              (b.center && b.center.lat) ??
-              (b.geometry && b.geometry.coordinates[1]),
-          );
-          const bLon = parseFloat(
-            b.lon ??
-              (b.center && b.center.lon) ??
-              (b.geometry && b.geometry.coordinates[0]),
-          );
-          return (
-            getDist(userCoords.lat, userCoords.lon, aLat, aLon) -
-            getDist(userCoords.lat, userCoords.lon, bLat, bLon)
-          );
-        })[0];
+          const d = getDist(userCoords.lat, userCoords.lon, elLat, elLon);
+          if (d < minDist) {
+            minDist = d;
+            closest = el;
+          }
+        }
+        return closest;
       }
 
       function showError(msg) {
