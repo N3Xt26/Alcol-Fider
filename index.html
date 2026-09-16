@@ -537,7 +537,7 @@
       
       shareBtn.addEventListener("click", () => {
         if (!targetPlaceData) return;
-        const name = targetPlaceData.tags.name || "Locale misterioso";
+        const name = (targetPlaceData.tags && targetPlaceData.tags.name) || targetPlaceData.name || "Locale misterioso";
         
         // LINK GOOGLE MAPS CORRETTO PER LA CONDIVISIONE
         const mapUrl = `https://www.google.com/maps/search/?api=1&query=${targetPlaceData.lat},${targetPlaceData.lon}`;
@@ -655,6 +655,100 @@
         }
       }
 
+      async function fetchWithTimeout(resource, options = {}, timeoutMs = 3500) {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          const response = await fetch(resource, {
+            ...options,
+            signal: controller.signal,
+          });
+          return response;
+        } finally {
+          clearTimeout(id);
+        }
+      }
+
+      async function fetchFromPhoton(lat, lon, minLat, minLon, maxLat, maxLon, radius) {
+        const queries = ["bar", "pub"];
+        const found = [];
+        const seen = new Set();
+        for (const q of queries) {
+          try {
+            const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&bbox=${minLon.toFixed(5)},${minLat.toFixed(5)},${maxLon.toFixed(5)},${maxLat.toFixed(5)}&limit=35`;
+            const res = await fetchWithTimeout(url, {}, 3500);
+            if (!res.ok) continue;
+            const data = await res.json();
+            for (const f of data.features || []) {
+              const coords = f.geometry && f.geometry.coordinates;
+              if (!coords || coords.length < 2) continue;
+              const pLon = coords[0];
+              const pLat = coords[1];
+              const name = f.properties && (f.properties.name || f.properties.street);
+              if (!name) continue;
+              const dist = getDist(lat, lon, pLat, pLon);
+              if (dist <= radius) {
+                const key = `${name.toLowerCase().trim()}_${pLat.toFixed(3)}_${pLon.toFixed(3)}`;
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  found.push({
+                    lat: pLat,
+                    lon: pLon,
+                    name: name,
+                    tags: {
+                      name: name,
+                      amenity: (f.properties && f.properties.osm_value) || q,
+                    },
+                  });
+                }
+              }
+            }
+          } catch (e) {
+            console.warn("Photon query failed for " + q, e);
+          }
+        }
+        return found;
+      }
+
+      async function fetchFromNominatim(lat, lon, minLat, minLon, maxLat, maxLon, radius) {
+        const amenities = ["bar", "pub"];
+        const found = [];
+        const seen = new Set();
+        for (const a of amenities) {
+          try {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&amenity=${encodeURIComponent(a)}&bounded=1&viewbox=${minLon.toFixed(5)},${maxLat.toFixed(5)},${maxLon.toFixed(5)},${minLat.toFixed(5)}&limit=30`;
+            const res = await fetchWithTimeout(url, {}, 3500);
+            if (!res.ok) continue;
+            const list = await res.json();
+            for (const item of list || []) {
+              const pLat = parseFloat(item.lat);
+              const pLon = parseFloat(item.lon);
+              const name = item.name || (item.display_name && item.display_name.split(",")[0]);
+              if (!name || isNaN(pLat) || isNaN(pLon)) continue;
+              const dist = getDist(lat, lon, pLat, pLon);
+              if (dist <= radius) {
+                const key = `${name.toLowerCase().trim()}_${pLat.toFixed(3)}_${pLon.toFixed(3)}`;
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  found.push({
+                    lat: pLat,
+                    lon: pLon,
+                    name: name,
+                    tags: {
+                      name: name,
+                      amenity: item.type || a,
+                    },
+                  });
+                }
+              }
+            }
+          } catch (e) {
+            console.warn("Nominatim query failed for " + a, e);
+          }
+        }
+        return found;
+      }
+
       async function fetchPlaces() {
         const radiusIndex = document.getElementById("radius-slider").value;
         const radius = radiuses[radiusIndex];
@@ -673,16 +767,59 @@
           if (distFromCache < 200) useCache = true;
         }
         let places = [];
-        if (useCache) places = cachedPlaces;
-        else {
-          const query = `[out:json];(node["amenity"~"bar|pub|biergarten|nightclub"](around:${radius},${userCoords.lat},${userCoords.lon}););out center;`;
+        if (useCache) {
+          places = cachedPlaces;
+        } else {
+          const dLat = (radius * 1.2) / 111139;
+          const dLon =
+            (radius * 1.2) /
+            (111139 * Math.cos((userCoords.lat * Math.PI) / 180));
+          const minLat = userCoords.lat - dLat;
+          const maxLat = userCoords.lat + dLat;
+          const minLon = userCoords.lon - dLon;
+          const maxLon = userCoords.lon + dLon;
+
           try {
-            const res = await fetch(
-              `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`,
+            // 1. Prova prima con Photon (Komoot/OSM)
+            places = await fetchFromPhoton(
+              userCoords.lat,
+              userCoords.lon,
+              minLat,
+              minLon,
+              maxLat,
+              maxLon,
+              radius,
             );
-            const data = await res.json();
-            if (data.elements) {
-              places = data.elements;
+
+            // 2. Se Photon restituisce pochi risultati, integra con Nominatim
+            if (places.length < 3) {
+              const nomPlaces = await fetchFromNominatim(
+                userCoords.lat,
+                userCoords.lon,
+                minLat,
+                minLon,
+                maxLat,
+                maxLon,
+                radius,
+              );
+              if (nomPlaces.length > 0) {
+                const seen = new Set(
+                  places.map(
+                    (p) =>
+                      `${p.name.toLowerCase()}_${p.lat.toFixed(3)}_${p.lon.toFixed(3)}`,
+                  ),
+                );
+                for (const np of nomPlaces) {
+                  const k = `${np.name.toLowerCase()}_${np.lat.toFixed(3)}_${np.lon.toFixed(3)}`;
+                  if (!seen.has(k)) {
+                    seen.add(k);
+                    places.push(np);
+                  }
+                }
+              }
+            }
+
+            if (places.length > 0) {
               cachedPlaces = places;
               lastCacheCoords = { ...userCoords };
               lastCacheRadius = radius;
@@ -730,30 +867,61 @@
       }
 
       async function getRouteData(place) {
-        const url = `https://router.project-osrm.org/route/v1/foot/${userCoords.lon},${userCoords.lat};${place.lon},${place.lat}?overview=full&geometries=geojson`;
-        try {
-          const res = await fetch(url);
-          const json = await res.json();
-          if (json.routes && json.routes.length > 0) {
-            return {
-              route: json.routes[0].geometry.coordinates,
-              dist: Math.round(json.routes[0].distance),
-              time: Math.round(json.routes[0].duration / 60),
-            };
-          }
-        } catch (e) {}
-        return null;
+        const routers = [
+          // Router pedonale ufficiale OSM FOSSGIS (calcola marciapiedi e percorsi a piedi)
+          `https://routing.openstreetmap.de/routed-foot/route/v1/foot/${userCoords.lon},${userCoords.lat};${place.lon},${place.lat}?overview=full&geometries=geojson`,
+          // Router secondario ciclabile OSM FOSSGIS
+          `https://routing.openstreetmap.de/routed-bike/route/v1/driving/${userCoords.lon},${userCoords.lat};${place.lon},${place.lat}?overview=full&geometries=geojson`,
+          // Router demo OSRM
+          `https://router.project-osrm.org/route/v1/driving/${userCoords.lon},${userCoords.lat};${place.lon},${place.lat}?overview=full&geometries=geojson`,
+        ];
+
+        for (const url of routers) {
+          try {
+            const res = await fetchWithTimeout(url, {}, 2500);
+            if (!res.ok) continue;
+            const json = await res.json();
+            if (json.routes && json.routes.length > 0) {
+              return {
+                route: json.routes[0].geometry.coordinates,
+                dist: Math.round(json.routes[0].distance),
+                time: Math.max(1, Math.round(json.routes[0].duration / 60)),
+                isFallback: false,
+              };
+            }
+          } catch (e) {}
+        }
+
+        // Fallback locale immediato (distanza in linea d'aria e stima a piedi ~75 m/min)
+        const straightDist = Math.round(
+          getDist(userCoords.lat, userCoords.lon, place.lat, place.lon),
+        );
+        const estMinutes = Math.max(1, Math.round(straightDist / 75));
+        return {
+          route: [
+            [userCoords.lon, userCoords.lat],
+            [place.lon, place.lat],
+          ],
+          dist: straightDist,
+          time: estMinutes,
+          isFallback: true,
+        };
       }
 
       function applyRouteToUI(place, data) {
         routePath = data.route;
-        const name = place.tags.name || "Locale misterioso";
+        const name =
+          (place.tags && place.tags.name) ||
+          place.name ||
+          "Locale misterioso";
 
-        // NUOVO LINK CORRETTO (Indicazioni a piedi verso la destinazione usando le API di Maps):
+        // Indicazioni a piedi verso la destinazione usando le API di Maps:
         const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}&travelmode=walking`;
 
         targetText.innerHTML = `<a href="${mapsLink}" target="_blank" class="result-link">${name} <i data-lucide="external-link" width="14"></i></a>`;
-        statusText.innerHTML = `Distanza: <b>${data.dist}m</b> (${data.time} min).<br>Segui la bottiglia!`;
+        statusText.innerHTML = data.isFallback
+          ? `Distanza: <b>${data.dist}m</b> (~${data.time} min in linea d'aria).<br>Segui la bottiglia!`
+          : `Distanza: <b>${data.dist}m</b> (${data.time} min).<br>Segui la bottiglia!`;
 
         // --- HAPTIC SUCCESS ---
         if (navigator.vibrate) navigator.vibrate([50, 50, 150]);
@@ -780,22 +948,46 @@
       function displayFallback(place) {
         nextWaypoint = { lat: place.lat, lon: place.lon };
         targetCoords = { lat: place.lat, lon: place.lon };
-        const name = place.tags.name || "Locale trovato";
-        targetText.innerHTML = name;
-        statusText.innerHTML = "In linea d'aria.";
+        const name =
+          (place.tags && place.tags.name) || place.name || "Locale trovato";
+        const dist = Math.round(
+          getDist(userCoords.lat, userCoords.lon, place.lat, place.lon),
+        );
+        const time = Math.max(1, Math.round(dist / 75));
+        const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}&travelmode=walking`;
+
+        targetText.innerHTML = `<a href="${mapsLink}" target="_blank" class="result-link">${name} <i data-lucide="external-link" width="14"></i></a>`;
+        statusText.innerHTML = `Distanza: <b>${dist}m</b> (~${time} min in linea d'aria).<br>Segui la bottiglia!`;
 
         // --- HAPTIC SUCCESS ---
         if (navigator.vibrate) navigator.vibrate([50, 50, 150]);
 
+        routePath = [
+          [userCoords.lon, userCoords.lat],
+          [place.lon, place.lat],
+        ];
         shareBtn.classList.add("visible");
+        lucide.createIcons();
+
         appState = "TRACKING";
         iconSpin.classList.remove("searching-anim");
         mainBtn.disabled = false;
       }
 
       function normalizePlace(place) {
-        place.lat = place.lat || place.center.lat;
-        place.lon = place.lon || place.center.lon;
+        place.lat = parseFloat(
+          place.lat ??
+            (place.center && place.center.lat) ??
+            (place.geometry && place.geometry.coordinates[1]),
+        );
+        place.lon = parseFloat(
+          place.lon ??
+            (place.center && place.center.lon) ??
+            (place.geometry && place.geometry.coordinates[0]),
+        );
+        if (!place.tags) place.tags = {};
+        if (!place.tags.name)
+          place.tags.name = place.name || "Locale misterioso";
       }
 
       function updateNavigation(currentPos) {
@@ -941,21 +1133,32 @@
       }
 
       function getClosest(elements) {
-        return elements.sort(
-          (a, b) =>
-            getDist(
-              userCoords.lat,
-              userCoords.lon,
-              a.lat || a.center.lat,
-              a.lon || a.center.lon,
-            ) -
-            getDist(
-              userCoords.lat,
-              userCoords.lon,
-              b.lat || b.center.lat,
-              b.lon || b.center.lon,
-            ),
-        )[0];
+        return elements.slice().sort((a, b) => {
+          const aLat = parseFloat(
+            a.lat ??
+              (a.center && a.center.lat) ??
+              (a.geometry && a.geometry.coordinates[1]),
+          );
+          const aLon = parseFloat(
+            a.lon ??
+              (a.center && a.center.lon) ??
+              (a.geometry && a.geometry.coordinates[0]),
+          );
+          const bLat = parseFloat(
+            b.lat ??
+              (b.center && b.center.lat) ??
+              (b.geometry && b.geometry.coordinates[1]),
+          );
+          const bLon = parseFloat(
+            b.lon ??
+              (b.center && b.center.lon) ??
+              (b.geometry && b.geometry.coordinates[0]),
+          );
+          return (
+            getDist(userCoords.lat, userCoords.lon, aLat, aLon) -
+            getDist(userCoords.lat, userCoords.lon, bLat, bLon)
+          );
+        })[0];
       }
 
       function showError(msg) {
