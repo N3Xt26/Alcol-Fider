@@ -135,221 +135,143 @@
         font-weight: 700;
       }
 
-      /* Scheda Informativa Principale (Venue & Status Card) */
-      .venue-card {
-        width: 100%;
-        max-width: 330px;
-        background: var(--surface-glass);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid var(--surface-border);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-soft);
-        padding: 14px 16px;
-        margin-bottom: 10px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        z-index: 15;
-      }
-
-      /* View Switcher */
-      .venue-view {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        transition: opacity 0.25s ease, transform 0.25s ease;
-      }
-
-      .venue-view.hidden {
-        display: none !important;
-      }
-
-      /* Testi di Stato Iniziale & Ricerca */
-      .main-title {
-        font-size: clamp(1.25rem, 4.8vw, 1.5rem);
+      h1 {
+        font-size: clamp(1.4rem, 5vw, 1.75rem);
+        margin: 4px 0 2px 0;
         font-weight: 800;
-        color: var(--text-main);
-        margin: 0 0 4px 0;
-        letter-spacing: -0.3px;
         line-height: 1.25;
-      }
-
-      .main-desc {
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        margin: 0;
-        line-height: 1.4;
-      }
-
-      .searching-pulse {
-        animation: pulseTitle 1.5s ease-in-out infinite;
-      }
-
-      @keyframes pulseTitle {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.6; transform: scale(0.98); }
-      }
-
-      /* Intestazione del Locale (Titolo + Link Maps) */
-      .venue-header {
-        width: 100%;
+        letter-spacing: -0.5px;
+        min-height: 1.3em;
         display: flex;
+        align-items: center;
         justify-content: center;
-        margin-bottom: 8px;
+        color: var(--text-main);
+        transition: transform 0.3s ease;
       }
 
-      .venue-title-link {
+      #status {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin: 4px 0 6px 0;
+        padding: 0 16px;
+        line-height: 1.4;
+        min-height: 2.2em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transition: color 0.3s;
+      }
+
+      .status-chips {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--surface-border);
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-main);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      }
+
+      .stat-chip b {
+        color: var(--accent);
+      }
+
+      .arrived-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--green-soft);
+        color: var(--green-text);
+        border: 1px solid var(--green-border);
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-weight: 800;
+        font-size: 0.85rem;
+        animation: pulseArrival 1.5s infinite;
+      }
+
+      @keyframes pulseArrival {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+
+      /* Result Link */
+      .result-link {
         color: var(--text-main);
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: 6px;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 14px;
+        background: white;
+        border: 1.5px solid var(--surface-border);
         font-weight: 800;
-        font-size: clamp(1.1rem, 4.2vw, 1.3rem);
-        letter-spacing: -0.3px;
-        line-height: 1.25;
-        padding: 4px 10px;
-        border-radius: 10px;
-        background: rgba(255, 255, 255, 0.6);
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        font-size: clamp(1.05rem, 4.5vw, 1.3rem);
+        box-shadow: var(--shadow-soft);
         transition: all 0.2s ease;
-        max-width: 100%;
       }
 
-      .venue-title-link span {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .venue-title-link i {
+      .result-link i {
         color: var(--accent);
-        flex-shrink: 0;
       }
 
-      .venue-title-link:active {
-        background: rgba(255, 255, 255, 0.95);
-        transform: scale(0.98);
+      .result-link:active {
+        transform: scale(0.97);
+        border-color: var(--accent);
       }
 
-      /* Riga Metriche Sintetiche */
-      .venue-metrics {
-        width: 100%;
+      /* Opening Status Box & Badges */
+      .opening-status-box {
+        margin: 4px 0;
+        min-height: 24px;
         display: flex;
-        align-items: center;
         justify-content: center;
-        gap: 6px;
-        margin-bottom: 8px;
+        align-items: center;
       }
 
-      .metric-chip {
+      .opening-badge {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 5px 10px;
+        gap: 6px;
+        padding: 4px 12px;
         border-radius: 9999px;
-        font-size: 0.74rem;
+        font-size: 0.73rem;
         font-weight: 700;
-        background: white;
-        border: 1px solid var(--surface-border);
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
-        color: var(--text-main);
-        white-space: nowrap;
+        line-height: 1.3;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        animation: fadeIn 0.3s ease;
       }
 
-      .metric-chip i {
-        color: var(--text-secondary);
-      }
-
-      .metric-chip .sub-val {
-        color: var(--text-dim);
-        font-weight: 600;
-      }
-
-      /* Indicatori di Apertura */
-      .chip-open {
+      .opening-badge.badge-open {
         background: var(--green-soft);
         color: var(--green-text);
-        border-color: var(--green-border);
-      }
-      .chip-open i {
-        color: var(--green-text);
+        border: 1px solid var(--green-border);
       }
 
-      .chip-closed {
+      .opening-badge.badge-closed {
         background: var(--red-soft);
         color: var(--red-text);
-        border-color: var(--red-border);
-      }
-      .chip-closed i {
-        color: var(--red-text);
-      }
-
-      .chip-unknown {
-        background: var(--amber-soft);
-        color: var(--amber-text);
-        border-color: var(--amber-border);
-      }
-      .chip-unknown i {
-        color: var(--amber-text);
-      }
-
-      /* Box Avviso Esplicito */
-      .venue-alert {
-        width: 100%;
-        padding: 7px 10px;
-        border-radius: 10px;
-        font-size: 0.73rem;
-        line-height: 1.35;
-        text-align: left;
-        display: flex;
-        align-items: flex-start;
-        gap: 6px;
-        margin-bottom: 8px;
-        animation: fadeIn 0.25s ease;
-      }
-
-      .venue-alert.hidden {
-        display: none !important;
-      }
-
-      .venue-alert.alert-amber {
-        background: var(--amber-soft);
-        border: 1px solid var(--amber-border);
-        color: var(--amber-text);
-      }
-      .venue-alert.alert-amber i {
-        color: var(--amber-text);
-        flex-shrink: 0;
-        margin-top: 1px;
-      }
-
-      .venue-alert.alert-red {
-        background: var(--red-soft);
         border: 1px solid var(--red-border);
-        color: var(--red-text);
-      }
-      .venue-alert.alert-red i {
-        color: var(--red-text);
-        flex-shrink: 0;
-        margin-top: 1px;
       }
 
-      .venue-alert.alert-info {
-        background: rgba(140, 151, 170, 0.1);
-        border: 1px solid rgba(140, 151, 170, 0.2);
-        color: var(--text-secondary);
-      }
-      .venue-alert.alert-info i {
-        color: var(--text-secondary);
-        flex-shrink: 0;
-        margin-top: 1px;
+      .opening-badge.badge-unknown {
+        background: var(--amber-soft);
+        color: var(--amber-text);
+        border: 1px solid var(--amber-border);
       }
 
       @keyframes fadeIn {
@@ -357,88 +279,59 @@
         to { opacity: 1; transform: translateY(0); }
       }
 
-      /* Pulsanti di Azione Compatti */
-      .venue-actions {
-        width: 100%;
+      /* Bottoni di Azione */
+      .button-group {
         display: flex;
-        gap: 6px;
         justify-content: center;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 4px;
       }
 
-      .action-btn {
-        flex: 1;
-        height: 36px;
+      .share-btn, .another-btn {
+        border: none;
+        padding: 8px 16px;
         border-radius: 9999px;
-        font-size: 0.76rem;
+        font-size: 0.78rem;
         font-weight: 700;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
         gap: 6px;
         cursor: pointer;
-        border: 1px solid transparent;
-        transition: all 0.2s ease;
-        padding: 0 10px;
-        white-space: nowrap;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: none;
       }
 
-      .action-btn:active {
-        transform: scale(0.96);
+      .share-btn.visible, .another-btn.visible {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
       }
 
-      .action-btn.btn-share {
+      .share-btn {
         background: var(--green-soft);
         color: var(--green-text);
-        border-color: var(--green-border);
-      }
-
-      .action-btn.btn-another {
-        background: white;
-        color: var(--text-main);
-        border-color: var(--surface-border);
-      }
-      .action-btn.btn-another:hover, .action-btn.btn-another:active {
-        background: var(--bg-base);
-      }
-      .action-btn.btn-another i {
-        color: var(--accent);
-      }
-
-      /* Guida alla Navigazione */
-      .nav-guide {
-        display: none;
-        align-items: center;
-        gap: 5px;
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        margin-top: 8px;
-      }
-
-      .nav-guide.active {
-        display: inline-flex;
-      }
-
-      .nav-guide i {
-        color: var(--accent);
-      }
-
-      .nav-guide.arrived {
-        color: var(--green-text);
-        background: var(--green-soft);
         border: 1px solid var(--green-border);
-        padding: 4px 10px;
-        border-radius: 9999px;
-        font-weight: 700;
-        animation: pulseArrival 1.5s infinite;
-      }
-      .nav-guide.arrived i {
-        color: var(--green-text);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.12);
       }
 
-      @keyframes pulseArrival {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
+      .share-btn:active {
+        transform: scale(0.95);
+      }
+
+      .another-btn {
+        background: white;
+        color: var(--accent);
+        border: 1.5px solid var(--accent);
+        box-shadow: 0 4px 12px rgba(242, 106, 79, 0.12);
+      }
+
+      .another-btn:active {
+        transform: scale(0.95);
+        background: var(--accent-soft);
       }
 
       /* Sezione Stage & Bussola */
@@ -923,59 +816,18 @@
 
       <section id="section-stage">
         <div class="venue-card">
-          <!-- STATO INIZIALE / IDLE -->
-          <div class="venue-view active" id="view-initial">
-            <h1 class="main-title" id="initial-title">Hai sete?</h1>
-            <p class="main-desc" id="initial-desc">Tocca la bottiglia per trovare il locale più vicino</p>
+          <h1 id="target-name">Hai sete?</h1>
+          <div id="opening-status" class="opening-status-box"></div>
+          <div class="button-group">
+            <button class="share-btn" id="btn-share" type="button">
+              <i data-lucide="share-2" width="15" height="15"></i> Invita amici
+            </button>
+            <button class="another-btn" id="btn-another" type="button">
+              <i data-lucide="shuffle" width="15" height="15"></i> Altro locale
+            </button>
           </div>
-
-          <!-- STATO RICERCA / SEARCHING -->
-          <div class="venue-view" id="view-searching">
-            <div class="search-badge">
-              <span class="search-dot"></span>
-              <span id="search-status-text">Cerco i locali nelle vicinanze...</span>
-            </div>
-          </div>
-
-          <!-- STATO RISULTATO / TRACKING -->
-          <div class="venue-view" id="view-result">
-            <div class="venue-header">
-              <a href="#" target="_blank" rel="noopener noreferrer" class="venue-title-link" id="venue-link">
-                <span class="venue-name" id="venue-name">Nome locale</span>
-                <i data-lucide="external-link" width="15" height="15"></i>
-              </a>
-            </div>
-
-            <div class="venue-metrics">
-              <div class="metric-chip" id="chip-distance">
-                <i data-lucide="footprints" width="14" height="14"></i>
-                <span id="distance-val">-- m</span>
-                <span class="metric-sub" id="time-val"></span>
-              </div>
-              <div class="metric-chip chip-unknown" id="chip-hours">
-                <i data-lucide="clock" width="14" height="14"></i>
-                <span id="hours-text">Orari non indicati</span>
-              </div>
-            </div>
-
-            <div class="venue-alert" id="venue-alert">
-              <i data-lucide="alert-triangle" width="16" height="16"></i>
-              <div class="alert-content">
-                <span class="alert-title" id="alert-title">Orari non disponibili</span>
-                <span class="alert-desc" id="alert-desc">Il locale potrebbe essere chiuso all'arrivo. Usa "Altro locale" se preferisci andare sul sicuro.</span>
-              </div>
-            </div>
-
-            <div class="venue-actions">
-              <button class="action-btn btn-share" id="btn-share" type="button" aria-label="Invita amici">
-                <i data-lucide="share-2" width="15" height="15"></i>
-                <span>Invita amici</span>
-              </button>
-              <button class="action-btn btn-another" id="btn-another" type="button" aria-label="Altro locale">
-                <i data-lucide="shuffle" width="15" height="15"></i>
-                <span>Altro locale</span>
-              </button>
-            </div>
+          <div id="status-container">
+            <p id="status">Scegli la modalità e lancia la bottiglia.</p>
           </div>
         </div>
 
@@ -994,11 +846,6 @@
             alt="Bottiglia"
           />
         </div>
-      </div>
-
-      <div class="nav-guide" id="nav-guide">
-        <i data-lucide="navigation-2" width="14" height="14"></i>
-        <span id="nav-guide-text">Segui la direzione del tappo</span>
       </div>
     </section>
 
@@ -1106,26 +953,9 @@
       const compassBox = document.getElementById("compass-box");
       const compassRadar = document.getElementById("compass-radar");
       const iconSpin = document.getElementById("icon-spin");
-
-      // Stage Sub-views & Elements
-      const viewInitial = document.getElementById("view-initial");
-      const viewSearching = document.getElementById("view-searching");
-      const viewResult = document.getElementById("view-result");
-      const initialTitle = document.getElementById("initial-title");
-      const initialDesc = document.getElementById("initial-desc");
-      const searchStatusText = document.getElementById("search-status-text");
-      const venueLink = document.getElementById("venue-link");
-      const venueName = document.getElementById("venue-name");
-      const distanceVal = document.getElementById("distance-val");
-      const timeVal = document.getElementById("time-val");
-      const chipHours = document.getElementById("chip-hours");
-      const hoursText = document.getElementById("hours-text");
-      const venueAlert = document.getElementById("venue-alert");
-      const alertTitle = document.getElementById("alert-title");
-      const alertDesc = document.getElementById("alert-desc");
-      const navGuide = document.getElementById("nav-guide");
-      const navGuideText = document.getElementById("nav-guide-text");
-
+      const statusText = document.getElementById("status");
+      const targetText = document.getElementById("target-name");
+      const openingStatusEl = document.getElementById("opening-status");
       const radiusCard = document.getElementById("radius-card");
       const radiusSlider = document.getElementById("radius-slider");
       const radiusBadge = document.getElementById("radius-badge");
@@ -1134,12 +964,6 @@
       const shareBtn = document.getElementById("btn-share");
       const anotherBtn = document.getElementById("btn-another");
       const mainBtn = document.getElementById("main-btn");
-
-      function switchVenueView(view) {
-        if (viewInitial) viewInitial.classList.toggle("active", view === "initial");
-        if (viewSearching) viewSearching.classList.toggle("active", view === "searching");
-        if (viewResult) viewResult.classList.toggle("active", view === "result");
-      }
 
       const calibOverlay = document.getElementById("calibration-overlay");
       const calibTitle = document.getElementById("calib-title");
@@ -1235,8 +1059,7 @@
           } catch (e) {}
         }
 
-        switchVenueView("searching");
-        if (searchStatusText) searchStatusText.textContent = "Controllo sensori e GPS...";
+        targetText.innerHTML = "Controllo sensori...";
 
         navigator.geolocation.getCurrentPosition(
           async (pos) => {
@@ -1295,13 +1118,7 @@
         const icon = document.getElementById("icon-spin");
         if (icon) icon.classList.add("searching-anim");
         if (compassRadar) compassRadar.classList.add("active");
-        switchVenueView("searching");
-        if (searchStatusText) {
-          searchStatusText.textContent =
-            currentMode === "NEAR"
-              ? "Cerco il locale più vicino..."
-              : "Cerco un locale a sorpresa...";
-        }
+        targetText.innerHTML = "Cerco locali...";
         velocity = SPIN_SPEED;
         fetchPlaces();
       }
@@ -1326,26 +1143,16 @@
         nextWaypoint = null;
         routePath = [];
         targetPlaceData = null;
-
-        switchVenueView("initial");
-        if (initialTitle) initialTitle.textContent = "Hai sete?";
-        if (initialDesc) {
-          initialDesc.textContent =
-            currentMode === "NEAR"
-              ? "Tocca la bottiglia per trovare il locale più vicino"
-              : "Tocca la bottiglia per trovare un locale a sorpresa";
-        }
-
-        if (venueAlert) venueAlert.className = "venue-alert";
-        if (navGuide) {
-          navGuide.className = "nav-guide";
-          if (navGuideText) navGuideText.textContent = "Segui la direzione del tappo";
-        }
-
+        targetText.innerHTML = "Hai sete?";
+        statusText.innerHTML =
+          currentMode === "NEAR"
+            ? "Troverò il locale più vicino."
+            : "Troverò un locale a sorpresa.";
         const icon = document.getElementById("icon-spin");
         if (icon) icon.classList.remove("searching-anim");
         if (compassRadar) compassRadar.classList.remove("active");
-        if (shareBtn) shareBtn.classList.remove("visible");
+        if (openingStatusEl) openingStatusEl.innerHTML = "";
+        shareBtn.classList.remove("visible");
         if (anotherBtn) {
           anotherBtn.classList.remove("visible");
           anotherBtn.disabled = false;
@@ -1586,7 +1393,7 @@
       }
 
       function applyRouteToUI(place, data) {
-        if (data.route) routePath = data.route;
+        routePath = data.route;
         const name =
           (place.tags && place.tags.name) ||
           place.name ||
@@ -1595,45 +1402,27 @@
         // Indicazioni a piedi verso la destinazione usando le API di Maps:
         const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}&travelmode=walking`;
 
-        if (venueName) venueName.textContent = name;
-        if (venueLink) venueLink.href = mapsLink;
-
-        // Metric chips: Distanza e Tempo di camminata
-        if (distanceVal) distanceVal.textContent = `${data.dist} m`;
-        if (timeVal) {
-          timeVal.textContent = `(~${data.time} min${data.isFallback ? ' a vista' : ''})`;
-        }
+        targetText.innerHTML = `<a href="${mapsLink}" target="_blank" class="result-link">${name} <i data-lucide="external-link" width="14" height="14"></i></a>`;
+        statusText.innerHTML = `
+          <div class="status-chips">
+            <span class="stat-chip"><i data-lucide="footprints" width="13" height="13"></i> <b>${data.dist} m</b></span>
+            <span class="stat-chip"><i data-lucide="clock" width="13" height="13"></i> <b>~${data.time} min</b></span>
+            ${data.isFallback ? '<span class="stat-chip fallback-chip">linea d&rsquo;aria</span>' : ''}
+          </div>
+          <div class="status-hint">Punta verso l&rsquo;obiettivo e segui la bottiglia!</div>
+        `;
 
         // Verifica stato apertura e orari
         const ohInfo = checkOpeningHours(place.opening_hours);
-        if (chipHours) {
-          chipHours.className = `metric-chip ${ohInfo.chipClass}`;
-          chipHours.innerHTML = `<i data-lucide="${ohInfo.icon}" width="14" height="14"></i> <span>${ohInfo.label}</span>`;
+        if (openingStatusEl) {
+          openingStatusEl.innerHTML = `<span class="opening-badge ${ohInfo.badgeClass}"><i data-lucide="${ohInfo.icon}" width="14" height="14"></i> ${ohInfo.message}</span>`;
         }
-
-        if (venueAlert) {
-          if (ohInfo.showAlert) {
-            venueAlert.className = `venue-alert active ${ohInfo.status === 'CLOSED' ? 'alert-red' : ''}`;
-            if (alertTitle) alertTitle.textContent = ohInfo.alertTitle;
-            if (alertDesc) alertDesc.textContent = ohInfo.alertMessage;
-          } else {
-            venueAlert.className = "venue-alert";
-          }
-        }
-
-        // Linea di orientamento bussola
-        if (navGuide) {
-          navGuide.className = "nav-guide active";
-          if (navGuideText) navGuideText.textContent = "Segui la direzione del tappo";
-        }
-
-        switchVenueView("result");
 
         // --- HAPTIC SUCCESS ---
         if (navigator.vibrate) navigator.vibrate([50, 50, 150]);
 
         targetCoords = { lat: place.lat, lon: place.lon };
-        if (shareBtn) shareBtn.classList.add("visible");
+        shareBtn.classList.add("visible");
         if (anotherBtn) anotherBtn.classList.add("visible");
         lucide.createIcons();
 
@@ -1647,8 +1436,7 @@
       }
 
       async function calculateRoute(place) {
-        switchVenueView("searching");
-        if (searchStatusText) searchStatusText.textContent = "Calcolo percorso a piedi...";
+        targetText.innerHTML = "Calcolo percorso...";
         targetCoords = { lat: place.lat, lon: place.lon };
         const data = await getRouteData(place);
         if (data) applyRouteToUI(place, data);
@@ -1658,22 +1446,46 @@
       function displayFallback(place) {
         nextWaypoint = { lat: place.lat, lon: place.lon };
         targetCoords = { lat: place.lat, lon: place.lon };
+        const name =
+          (place.tags && place.tags.name) || place.name || "Locale trovato";
         const dist = Math.round(
           getDist(userCoords.lat, userCoords.lon, place.lat, place.lon),
         );
         const time = Math.max(1, Math.round(dist / 75));
+        const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lon}&travelmode=walking`;
 
-        const fallbackRoute = [
+        targetText.innerHTML = `<a href="${mapsLink}" target="_blank" class="result-link">${name} <i data-lucide="external-link" width="14" height="14"></i></a>`;
+        statusText.innerHTML = `
+          <div class="status-chips">
+            <span class="stat-chip"><i data-lucide="footprints" width="13" height="13"></i> <b>${dist} m</b></span>
+            <span class="stat-chip"><i data-lucide="clock" width="13" height="13"></i> <b>~${time} min</b></span>
+            <span class="stat-chip fallback-chip">linea d&rsquo;aria</span>
+          </div>
+          <div class="status-hint">Punta verso l&rsquo;obiettivo e segui la bottiglia!</div>
+        `;
+
+        // Verifica stato apertura e orari
+        const ohInfo = checkOpeningHours(place.opening_hours);
+        if (openingStatusEl) {
+          openingStatusEl.innerHTML = `<span class="opening-badge ${ohInfo.badgeClass}"><i data-lucide="${ohInfo.icon}" width="14" height="14"></i> ${ohInfo.message}</span>`;
+        }
+
+        // --- HAPTIC SUCCESS ---
+        if (navigator.vibrate) navigator.vibrate([50, 50, 150]);
+
+        routePath = [
           [userCoords.lon, userCoords.lat],
           [place.lon, place.lat],
         ];
+        shareBtn.classList.add("visible");
+        if (anotherBtn) anotherBtn.classList.add("visible");
+        lucide.createIcons();
 
-        applyRouteToUI(place, {
-          dist: dist,
-          time: time,
-          route: fallbackRoute,
-          isFallback: true,
-        });
+        appState = "TRACKING";
+        const icon = document.getElementById("icon-spin");
+        if (icon) icon.classList.remove("searching-anim");
+        if (compassRadar) compassRadar.classList.remove("active");
+        mainBtn.disabled = false;
       }
 
       function normalizePlace(place) {
@@ -1700,12 +1512,9 @@
         if (!ohStr || typeof ohStr !== "string" || !ohStr.trim()) {
           return {
             status: "UNKNOWN",
-            label: "Orari non indicati",
-            chipClass: "chip-unknown",
-            icon: "clock",
-            alertTitle: "Orari non disponibili",
-            alertMessage: "Il locale potrebbe essere chiuso all'arrivo. Usa \"Altro locale\" se preferisci andare sul sicuro.",
-            showAlert: true,
+            message: "Orari non disponibili: potrebbe essere chiuso all'arrivo",
+            badgeClass: "badge-unknown",
+            icon: "alert-triangle",
           };
         }
 
@@ -1713,12 +1522,9 @@
         if (s === "24/7") {
           return {
             status: "OPEN",
-            label: "Aperto 24/7",
-            chipClass: "chip-open",
+            message: "Aperto 24/7",
+            badgeClass: "badge-open",
             icon: "check-circle-2",
-            alertTitle: "",
-            alertMessage: "",
-            showAlert: false,
           };
         }
 
@@ -1828,32 +1634,23 @@
         if (isOpen) {
           return {
             status: "OPEN",
-            label: "Aperto ora",
-            chipClass: "chip-open",
+            message: `Aperto ora (${s})`,
+            badgeClass: "badge-open",
             icon: "check-circle-2",
-            alertTitle: "",
-            alertMessage: "",
-            showAlert: false,
           };
         } else if (applicableRuleFound) {
           return {
             status: "CLOSED",
-            label: "Chiuso ora",
-            chipClass: "chip-closed",
+            message: `Attualmente chiuso (${s})`,
+            badgeClass: "badge-closed",
             icon: "clock",
-            alertTitle: "Locale attualmente chiuso",
-            alertMessage: `In base agli orari registrati (${s}), il locale risulta chiuso. Tocca "Altro locale" per trovarne un altro.`,
-            showAlert: true,
           };
         } else {
           return {
             status: "UNKNOWN",
-            label: "Orari non verificabili",
-            chipClass: "chip-unknown",
+            message: `Orari (${s}): potrebbe essere chiuso all'arrivo`,
+            badgeClass: "badge-unknown",
             icon: "alert-triangle",
-            alertTitle: "Orari non standard",
-            alertMessage: `Orari indicati: "${s}". Il locale potrebbe essere chiuso all'arrivo.`,
-            showAlert: true,
           };
         }
       }
@@ -1865,19 +1662,16 @@
         }
 
         if (currentCandidates.length === 1) {
-          if (venueAlert) {
-            venueAlert.className = "venue-alert alert-info active";
-            if (alertTitle) alertTitle.textContent = "Unico locale nelle vicinanze";
-            if (alertDesc) alertDesc.textContent = "È l'unico locale trovato in questo raggio. Segui la bottiglia!";
-          }
+          statusText.innerHTML =
+            "È l'unico locale trovato nelle vicinanze!<br>Segui la bottiglia!";
           return;
         }
 
         if (anotherBtn) anotherBtn.disabled = true;
         // Effetto rotazione bottiglia
         velocity = SPIN_SPEED * 0.7;
-        switchVenueView("searching");
-        if (searchStatusText) searchStatusText.textContent = "Cerco un altro locale...";
+        targetText.innerHTML = "Cerco un altro locale...";
+        if (openingStatusEl) openingStatusEl.innerHTML = "";
 
         if (currentMode === "NEAR") {
           currentCandidateIndex++;
@@ -1950,30 +1744,15 @@
 
             if (appState === "TRACKING") {
               updateNavigation(userCoords);
-              const d = Math.round(
-                getDist(
-                  userCoords.lat,
-                  userCoords.lon,
-                  targetCoords.lat,
-                  targetCoords.lon,
-                ),
+              const d = getDist(
+                userCoords.lat,
+                userCoords.lon,
+                targetCoords.lat,
+                targetCoords.lon,
               );
               updateVisualFeedback(d);
-
-              // Aggiornamento real-time di distanza e stima tempo
-              if (distanceVal) distanceVal.textContent = `${d} m`;
-              if (timeVal) {
-                const estMin = Math.max(1, Math.round(d / 75));
-                timeVal.textContent = `(~${estMin} min)`;
-              }
-
               if (d < 15) {
-                if (navGuide) {
-                  navGuide.className = "nav-guide arrived active";
-                  if (navGuideText) {
-                    navGuideText.innerHTML = '<i data-lucide="party-popper" width="14" height="14"></i> Sei arrivato a destinazione! 🍻';
-                  }
-                }
+                statusText.innerHTML = '<span class="stat-chip arrival-chip"><i data-lucide="party-popper" width="14" height="14"></i> Sei arrivato a destinazione! 🍻</span>';
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 compassBox.style.borderColor = "var(--green)";
                 compassBox.style.boxShadow = "0 0 25px rgba(22, 163, 74, 0.4)";
