@@ -262,8 +262,15 @@
         font-size: 0.9rem;
         margin-top: 5px;
       }
+      .button-group {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
       .share-btn {
-        margin-top: 10px;
         background: var(--green-light);
         color: var(--green-dark);
         border: none;
@@ -284,6 +291,71 @@
         opacity: 1;
         transform: scale(1);
         pointer-events: auto;
+      }
+      .another-btn {
+        background: white;
+        color: var(--accent);
+        border: 1.5px solid var(--accent);
+        padding: 7px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: 0.3s;
+        pointer-events: none;
+        box-shadow: 0 4px 12px rgba(224, 124, 106, 0.12);
+      }
+      .another-btn.visible {
+        opacity: 1;
+        transform: scale(1);
+        pointer-events: auto;
+      }
+      .another-btn:active {
+        transform: scale(0.95);
+      }
+      .opening-status-box {
+        margin-top: 6px;
+        min-height: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .opening-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 16px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        line-height: 1.3;
+        max-width: 90%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        animation: fadeIn 0.3s ease;
+      }
+      .opening-badge.badge-open {
+        background: #e8f8f0;
+        color: #1b7a4b;
+        border: 1px solid #b7ebd2;
+      }
+      .opening-badge.badge-closed {
+        background: #fde8e8;
+        color: #b91c1c;
+        border: 1px solid #f8b4b4;
+      }
+      .opening-badge.badge-unknown {
+        background: #fff8e6;
+        color: #b45309;
+        border: 1px solid #fde68a;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
       #error-box {
@@ -395,9 +467,15 @@
       <header>
         <div id="app-label">Drink Compass 6.4</div>
         <h1 id="target-name">Hai sete?</h1>
-        <button class="share-btn" id="btn-share">
-          <i data-lucide="share-2" width="16"></i> Invita amici
-        </button>
+        <div id="opening-status" class="opening-status-box"></div>
+        <div class="button-group">
+          <button class="share-btn" id="btn-share">
+            <i data-lucide="share-2" width="16"></i> Invita amici
+          </button>
+          <button class="another-btn" id="btn-another">
+            <i data-lucide="shuffle" width="16"></i> Cerca un altro locale
+          </button>
+        </div>
         <p id="status">Scegli la modalità e lancia la bottiglia.</p>
       </header>
       <div class="compass-box" id="compass-box">
@@ -461,6 +539,8 @@
         targetPlaceData = null,
         routePath = [],
         nextWaypoint = null;
+      let currentCandidates = [],
+        currentCandidateIndex = 0;
       let watchId = null;
 
       const radiuses = [500, 1000, 2500, 5000];
@@ -482,9 +562,11 @@
       const iconSpin = document.getElementById("icon-spin");
       const statusText = document.getElementById("status");
       const targetText = document.getElementById("target-name");
+      const openingStatusEl = document.getElementById("opening-status");
       const radiusCard = document.getElementById("radius-card");
       const errorBox = document.getElementById("error-box");
       const shareBtn = document.getElementById("btn-share");
+      const anotherBtn = document.getElementById("btn-another");
       const mainBtn = document.getElementById("main-btn");
 
       const calibOverlay = document.getElementById("calibration-overlay");
@@ -534,6 +616,7 @@
         .addEventListener("click", () => setMode("RANDOM"));
       mainBtn.addEventListener("click", startFlow);
       calibManualBtn.addEventListener("click", completeCalibrationSuccess);
+      anotherBtn.addEventListener("click", selectNextPlace);
       
       shareBtn.addEventListener("click", () => {
         if (!targetPlaceData) return;
@@ -647,7 +730,12 @@
             ? "Troverò il locale più vicino."
             : "Troverò un locale a sorpresa.";
         iconSpin.classList.remove("searching-anim");
+        if (openingStatusEl) openingStatusEl.innerHTML = "";
         shareBtn.classList.remove("visible");
+        if (anotherBtn) {
+          anotherBtn.classList.remove("visible");
+          anotherBtn.disabled = false;
+        }
         compassBox.style.boxShadow = "0 10px 40px rgba(0, 0, 0, 0.04)";
         compassBox.style.borderColor = "white";
         mainBtn.disabled = false;
@@ -734,7 +822,7 @@
         const nomAmenities = ["bar", "pub", "cafe", "biergarten"];
         const nomPromises = nomAmenities.map(async (amenity) => {
           try {
-            const url = `https://nominatim.openstreetmap.org/search?format=json&amenity=${encodeURIComponent(amenity)}&bounded=1&viewbox=${minLon.toFixed(5)},${maxLat.toFixed(5)},${maxLon.toFixed(5)},${minLat.toFixed(5)}&limit=50`;
+            const url = `https://nominatim.openstreetmap.org/search?format=json&extratags=1&amenity=${encodeURIComponent(amenity)}&bounded=1&viewbox=${minLon.toFixed(5)},${maxLat.toFixed(5)},${maxLon.toFixed(5)},${minLat.toFixed(5)}&limit=50`;
             const res = await fetchWithTimeout(url, {}, 4000);
             if (!res.ok) return [];
             const data = await res.json();
@@ -743,6 +831,7 @@
               lon: parseFloat(item.lon),
               name: item.name || (item.display_name && item.display_name.split(",")[0]),
               amenity: item.type || amenity,
+              opening_hours: (item.extratags && item.extratags.opening_hours) || null,
             }));
           } catch (e) {
             return [];
@@ -768,6 +857,7 @@
                 lon: coords[0],
                 name: name,
                 amenity: (f.properties && f.properties.osm_value) || q,
+                opening_hours: (f.properties && (f.properties.opening_hours || f.properties.osm_value_opening_hours)) || null,
               });
             }
             return list;
@@ -801,9 +891,11 @@
                     lon: item.lon,
                     name: item.name,
                     dist: dist,
+                    opening_hours: item.opening_hours || null,
                     tags: {
                       name: item.name,
                       amenity: item.amenity || "bar",
+                      opening_hours: item.opening_hours || null,
                     },
                   });
                 }
@@ -819,32 +911,21 @@
 
       async function finalizeSelection(places, radiusLimit) {
         if (currentMode === "NEAR") {
-          let place = getClosest(places);
+          currentCandidates = places;
+          currentCandidateIndex = 0;
+          let place = currentCandidates[0];
           normalizePlace(place);
           targetPlaceData = place;
           calculateRoute(place);
         } else {
-          let validFound = false;
           let candidates = places.filter((p) => p.dist <= radiusLimit);
           if (candidates.length === 0) candidates = [...places];
-
-          while (candidates.length > 0) {
-            const randIdx = Math.floor(Math.random() * candidates.length);
-            const place = candidates[randIdx];
-            normalizePlace(place);
-            const routeData = await getRouteData(place);
-            if (!routeData || (routeData && routeData.dist <= radiusLimit)) {
-              targetPlaceData = place;
-              if (routeData) applyRouteToUI(place, routeData);
-              else displayFallback(place);
-              validFound = true;
-              break;
-            } else {
-              candidates.splice(randIdx, 1);
-            }
-          }
-          if (!validFound)
-            showError("Nessun locale raggiungibile a piedi nel raggio.");
+          currentCandidates = candidates;
+          currentCandidateIndex = Math.floor(Math.random() * candidates.length);
+          let place = currentCandidates[currentCandidateIndex];
+          normalizePlace(place);
+          targetPlaceData = place;
+          calculateRoute(place);
         }
       }
 
@@ -905,11 +986,18 @@
           ? `Distanza: <b>${data.dist}m</b> (~${data.time} min in linea d'aria).<br>Segui la bottiglia!`
           : `Distanza: <b>${data.dist}m</b> (${data.time} min).<br>Segui la bottiglia!`;
 
+        // Verifica stato apertura e orari
+        const ohInfo = checkOpeningHours(place.opening_hours);
+        if (openingStatusEl) {
+          openingStatusEl.innerHTML = `<span class="opening-badge ${ohInfo.badgeClass}"><i data-lucide="${ohInfo.icon}" width="14" height="14"></i> ${ohInfo.message}</span>`;
+        }
+
         // --- HAPTIC SUCCESS ---
         if (navigator.vibrate) navigator.vibrate([50, 50, 150]);
 
         targetCoords = { lat: place.lat, lon: place.lon };
         shareBtn.classList.add("visible");
+        if (anotherBtn) anotherBtn.classList.add("visible");
         lucide.createIcons();
 
         updateNavigation(userCoords);
@@ -941,6 +1029,12 @@
         targetText.innerHTML = `<a href="${mapsLink}" target="_blank" class="result-link">${name} <i data-lucide="external-link" width="14"></i></a>`;
         statusText.innerHTML = `Distanza: <b>${dist}m</b> (~${time} min in linea d'aria).<br>Segui la bottiglia!`;
 
+        // Verifica stato apertura e orari
+        const ohInfo = checkOpeningHours(place.opening_hours);
+        if (openingStatusEl) {
+          openingStatusEl.innerHTML = `<span class="opening-badge ${ohInfo.badgeClass}"><i data-lucide="${ohInfo.icon}" width="14" height="14"></i> ${ohInfo.message}</span>`;
+        }
+
         // --- HAPTIC SUCCESS ---
         if (navigator.vibrate) navigator.vibrate([50, 50, 150]);
 
@@ -949,6 +1043,7 @@
           [place.lon, place.lat],
         ];
         shareBtn.classList.add("visible");
+        if (anotherBtn) anotherBtn.classList.add("visible");
         lucide.createIcons();
 
         appState = "TRACKING";
@@ -970,6 +1065,197 @@
         if (!place.tags) place.tags = {};
         if (!place.tags.name)
           place.tags.name = place.name || "Locale misterioso";
+        if (place.opening_hours === undefined) {
+          place.opening_hours =
+            (place.tags && place.tags.opening_hours) || null;
+        }
+      }
+
+      function checkOpeningHours(ohStr, dt = new Date()) {
+        if (!ohStr || typeof ohStr !== "string" || !ohStr.trim()) {
+          return {
+            status: "UNKNOWN",
+            message: "Orari non disponibili: potrebbe essere chiuso all'arrivo",
+            badgeClass: "badge-unknown",
+            icon: "alert-triangle",
+          };
+        }
+
+        const s = ohStr.trim();
+        if (s === "24/7") {
+          return {
+            status: "OPEN",
+            message: "Aperto 24/7",
+            badgeClass: "badge-open",
+            icon: "check-circle-2",
+          };
+        }
+
+        // JS getDay(): 0 is Sunday, 1 is Monday ... 6 is Saturday
+        // In OSM: Mo=0, Tu=1, We=2, Th=3, Fr=4, Sa=5, Su=6
+        const jsDay = dt.getDay();
+        const dayIdx = (jsDay + 6) % 7;
+        const currentMinutes = dt.getHours() * 60 + dt.getMinutes();
+        const daysMap = { mo: 0, tu: 1, we: 2, th: 3, fr: 4, sa: 5, su: 6 };
+
+        const rules = s.split(";");
+        let isOpen = false;
+        let applicableRuleFound = false;
+
+        for (let rule of rules) {
+          rule = rule.trim();
+          if (!rule) continue;
+
+          const parts = rule.split(/\s+(.+)/);
+          let dayPart = "mo-su";
+          let timePart = rule;
+          if (parts.length >= 2 && parts[1]) {
+            dayPart = parts[0].toLowerCase();
+            timePart = parts[1];
+          } else {
+            const firstToken = rule.split(" ")[0].toLowerCase();
+            if (Object.keys(daysMap).some((d) => firstToken.includes(d))) {
+              dayPart = firstToken;
+              timePart = rule.substring(firstToken.length).trim();
+            }
+          }
+
+          // Parse dayPart e.g. "mo-fr", "sa,su", "mo-sa"
+          const ruleDays = [];
+          for (let dp of dayPart.split(",")) {
+            dp = dp.trim();
+            if (dp.includes("-")) {
+              const [dStart, dEnd] = dp.split("-");
+              if (daysMap[dStart] !== undefined && daysMap[dEnd] !== undefined) {
+                const sI = daysMap[dStart];
+                const eI = daysMap[dEnd];
+                if (sI <= eI) {
+                  for (let i = sI; i <= eI; i++) ruleDays.push(i);
+                } else {
+                  for (let i = sI; i <= 6; i++) ruleDays.push(i);
+                  for (let i = 0; i <= eI; i++) ruleDays.push(i);
+                }
+              }
+            } else if (daysMap[dp] !== undefined) {
+              ruleDays.push(daysMap[dp]);
+            }
+          }
+
+          // If dayPart had no recognized day token (e.g. just hours "18:00-02:00"), assume all days
+          if (ruleDays.length === 0) {
+            for (let i = 0; i < 7; i++) ruleDays.push(i);
+          }
+
+          const yesterdayIdx = (dayIdx + 6) % 7;
+
+          for (let interval of timePart.split(",")) {
+            interval = interval.trim().toLowerCase();
+            if (interval === "off" || interval === "closed") {
+              if (ruleDays.includes(dayIdx)) {
+                applicableRuleFound = true;
+              }
+              continue;
+            }
+
+            const match = interval.match(
+              /(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/,
+            );
+            if (!match) continue;
+
+            const h1 = parseInt(match[1], 10);
+            const m1 = parseInt(match[2], 10);
+            const h2 = parseInt(match[3], 10);
+            const m2 = parseInt(match[4], 10);
+
+            const startM = h1 * 60 + m1;
+            const endM = h2 * 60 + m2;
+
+            if (ruleDays.includes(dayIdx)) {
+              applicableRuleFound = true;
+              if (endM > startM) {
+                if (currentMinutes >= startM && currentMinutes < endM) {
+                  isOpen = true;
+                }
+              } else {
+                // e.g. 18:00 - 02:00
+                if (currentMinutes >= startM) {
+                  isOpen = true;
+                }
+              }
+            }
+
+            // Past midnight interval from yesterday (e.g. opened yesterday at 18:00 and closes at 02:00 or 04:00 today)
+            if (ruleDays.includes(yesterdayIdx) && endM < startM) {
+              if (currentMinutes < endM) {
+                isOpen = true;
+                applicableRuleFound = true;
+              }
+            }
+          }
+        }
+
+        if (isOpen) {
+          return {
+            status: "OPEN",
+            message: `Aperto ora (${s})`,
+            badgeClass: "badge-open",
+            icon: "check-circle-2",
+          };
+        } else if (applicableRuleFound) {
+          return {
+            status: "CLOSED",
+            message: `Attualmente chiuso (${s})`,
+            badgeClass: "badge-closed",
+            icon: "clock",
+          };
+        } else {
+          return {
+            status: "UNKNOWN",
+            message: `Orari (${s}): potrebbe essere chiuso all'arrivo`,
+            badgeClass: "badge-unknown",
+            icon: "alert-triangle",
+          };
+        }
+      }
+
+      async function selectNextPlace() {
+        if (!currentCandidates || currentCandidates.length === 0) {
+          showError("Nessun altro locale disponibile.");
+          return;
+        }
+
+        if (currentCandidates.length === 1) {
+          statusText.innerHTML =
+            "È l'unico locale trovato nelle vicinanze!<br>Segui la bottiglia!";
+          return;
+        }
+
+        if (anotherBtn) anotherBtn.disabled = true;
+        // Effetto rotazione bottiglia
+        velocity = SPIN_SPEED * 0.7;
+        targetText.innerHTML = "Cerco un altro locale...";
+        if (openingStatusEl) openingStatusEl.innerHTML = "";
+
+        if (currentMode === "NEAR") {
+          currentCandidateIndex++;
+          if (currentCandidateIndex >= currentCandidates.length) {
+            currentCandidateIndex = 0; // ricomincia dal più vicino
+          }
+        } else {
+          let nextIdx = currentCandidateIndex;
+          let attempts = 0;
+          while (nextIdx === currentCandidateIndex && attempts < 10) {
+            nextIdx = Math.floor(Math.random() * currentCandidates.length);
+            attempts++;
+          }
+          currentCandidateIndex = nextIdx;
+        }
+
+        const nextPlace = currentCandidates[currentCandidateIndex];
+        normalizePlace(nextPlace);
+        targetPlaceData = nextPlace;
+        await calculateRoute(nextPlace);
+        if (anotherBtn) anotherBtn.disabled = false;
       }
 
       function updateNavigation(currentPos) {
