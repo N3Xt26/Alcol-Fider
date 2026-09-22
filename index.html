@@ -465,7 +465,7 @@
 
     <section id="section-stage">
       <header>
-        <div id="app-label">Drink Compass 6.4</div>
+        <div id="app-label">Alcol Finder</div>
         <h1 id="target-name">Hai sete?</h1>
         <div id="opening-status" class="opening-status-box"></div>
         <div class="button-group">
@@ -1075,7 +1075,7 @@
         if (!ohStr || typeof ohStr !== "string" || !ohStr.trim()) {
           return {
             status: "UNKNOWN",
-            message: "Orari non disponibili: potrebbe essere chiuso all'arrivo",
+            message: "Orari non disponibili",
             badgeClass: "badge-unknown",
             icon: "alert-triangle",
           };
@@ -1211,7 +1211,7 @@
         } else {
           return {
             status: "UNKNOWN",
-            message: `Orari (${s}): potrebbe essere chiuso all'arrivo`,
+            message: `Orari (${s})`,
             badgeClass: "badge-unknown",
             icon: "alert-triangle",
           };
@@ -1226,7 +1226,7 @@
 
         if (currentCandidates.length === 1) {
           statusText.innerHTML =
-            "È l'unico locale trovato nelle vicinanze!<br>Segui la bottiglia!";
+            "È l'unico locale trovato nelle vicinanze!";
           return;
         }
 
