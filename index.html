@@ -33,6 +33,7 @@
         margin: 0;
         padding: 0;
         height: 100vh;
+        height: 100dvh;
         width: 100vw;
         display: flex;
         flex-direction: column;
@@ -44,16 +45,22 @@
 
       /* Layout */
       #section-stage {
-        padding-top: 40px;
+        flex: 1;
+        min-height: 0;
+        padding-top: max(16px, env(safe-area-inset-top, 16px));
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: space-evenly;
         text-align: center;
-        flex-shrink: 0;
+        overflow: hidden;
       }
       header {
-        margin-bottom: 20px;
+        margin-bottom: 6px;
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
       #app-label {
         font-size: 0.7rem;
@@ -61,34 +68,42 @@
         letter-spacing: 2.5px;
         color: var(--accent);
         text-transform: uppercase;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
       }
-      h1 {
-        font-size: 1.6rem;
-        margin: 0;
-        font-weight: 800;
-        padding: 0 20px;
-        height: 2.4em;
+      .venue-title-row {
         display: flex;
         align-items: center;
         justify-content: center;
-        flex-direction: column;
+        gap: 8px;
+        padding: 0 15px;
+        width: 100%;
+        max-width: 440px;
+        min-height: 42px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.25;
       }
       #status {
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         color: var(--text-dim);
-        margin-top: 6px;
-        padding: 0 40px;
-        line-height: 1.4;
-        min-height: 3em;
+        margin: 4px 0 0 0;
+        padding: 0 25px;
+        line-height: 1.35;
+        min-height: 2.5em;
         transition: color 0.3s;
       }
 
       /* Bussola */
       .compass-box {
         position: relative;
-        width: min(65vw, 260px);
-        height: min(65vw, 260px);
+        width: min(58vw, 240px);
+        height: min(58vw, 240px);
         background: #fff;
         border-radius: 50%;
         display: flex;
@@ -96,6 +111,8 @@
         justify-content: center;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
         border: 6px solid white;
+        flex-shrink: 0;
+        cursor: pointer;
         transition:
           box-shadow 0.5s ease,
           border-color 0.3s ease;
@@ -109,24 +126,26 @@
 
       /* Controlli */
       #section-controls {
-        flex: 1;
+        height: 86px;
+        flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0 25px;
         position: relative;
+        z-index: 10;
       }
       .distance-card {
         width: 100%;
         max-width: 320px;
         background: rgba(255, 255, 255, 0.85);
         backdrop-filter: blur(10px);
-        padding: 20px;
-        border-radius: 22px;
+        padding: 14px 20px;
+        border-radius: 20px;
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
         opacity: 0;
-        transform: translateY(15px);
-        transition: all 0.4s;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
         pointer-events: none;
       }
       .distance-card.active {
@@ -254,69 +273,38 @@
         text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 6px 12px;
-        border-radius: 12px;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 14px;
         background: var(--accent-soft);
         font-weight: 700;
-        font-size: 0.9rem;
-        margin-top: 5px;
-      }
-      .button-group {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-top: 8px;
+        font-size: 0.95rem;
+        max-width: calc(100vw - 110px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .share-btn {
         background: var(--green-light);
         color: var(--green-dark);
         border: none;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 700;
-        display: inline-flex;
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 50%;
+        display: none;
         align-items: center;
-        gap: 6px;
+        justify-content: center;
         cursor: pointer;
-        opacity: 0;
-        transform: scale(0.9);
-        transition: 0.3s;
-        pointer-events: none;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       }
       .share-btn.visible {
-        opacity: 1;
-        transform: scale(1);
-        pointer-events: auto;
-      }
-      .another-btn {
-        background: white;
-        color: var(--accent);
-        border: 1.5px solid var(--accent);
-        padding: 7px 15px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 700;
         display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        opacity: 0;
+      }
+      .share-btn:active {
         transform: scale(0.9);
-        transition: 0.3s;
-        pointer-events: none;
-        box-shadow: 0 4px 12px rgba(224, 124, 106, 0.12);
-      }
-      .another-btn.visible {
-        opacity: 1;
-        transform: scale(1);
-        pointer-events: auto;
-      }
-      .another-btn:active {
-        transform: scale(0.95);
       }
       .opening-status-box {
         margin-top: 6px;
@@ -466,16 +454,13 @@
     <section id="section-stage">
       <header>
         <div id="app-label">Alcol Finder</div>
-        <h1 id="target-name">Hai sete?</h1>
-        <div id="opening-status" class="opening-status-box"></div>
-        <div class="button-group">
-          <button class="share-btn" id="btn-share">
-            <i data-lucide="share-2" width="16"></i>
-          </button>
-          <button class="another-btn" id="btn-another">
-            <i data-lucide="shuffle" width="16"></i>
+        <div class="venue-title-row">
+          <h1 id="target-name">Hai sete?</h1>
+          <button class="share-btn" id="btn-share" type="button" aria-label="Condividi locale" title="Condividi locale">
+            <i data-lucide="share-2" width="16" height="16"></i>
           </button>
         </div>
+        <div id="opening-status" class="opening-status-box"></div>
         <p id="status">Scegli la modalità e lancia la bottiglia.</p>
       </header>
       <div class="compass-box" id="compass-box">
@@ -566,7 +551,6 @@
       const radiusCard = document.getElementById("radius-card");
       const errorBox = document.getElementById("error-box");
       const shareBtn = document.getElementById("btn-share");
-      const anotherBtn = document.getElementById("btn-another");
       const mainBtn = document.getElementById("main-btn");
 
       const calibOverlay = document.getElementById("calibration-overlay");
@@ -614,9 +598,19 @@
       document
         .getElementById("btn-random")
         .addEventListener("click", () => setMode("RANDOM"));
-      mainBtn.addEventListener("click", startFlow);
+
+      function handleMainAction() {
+        if (mainBtn.disabled) return;
+        if (appState === "TRACKING" && currentCandidates && currentCandidates.length > 0) {
+          selectNextPlace();
+        } else {
+          startFlow();
+        }
+      }
+
+      mainBtn.addEventListener("click", handleMainAction);
+      compassBox.addEventListener("click", handleMainAction);
       calibManualBtn.addEventListener("click", completeCalibrationSuccess);
-      anotherBtn.addEventListener("click", selectNextPlace);
       
       shareBtn.addEventListener("click", () => {
         if (!targetPlaceData) return;
@@ -732,10 +726,6 @@
         iconSpin.classList.remove("searching-anim");
         if (openingStatusEl) openingStatusEl.innerHTML = "";
         shareBtn.classList.remove("visible");
-        if (anotherBtn) {
-          anotherBtn.classList.remove("visible");
-          anotherBtn.disabled = false;
-        }
         compassBox.style.boxShadow = "0 10px 40px rgba(0, 0, 0, 0.04)";
         compassBox.style.borderColor = "white";
         mainBtn.disabled = false;
@@ -997,7 +987,6 @@
 
         targetCoords = { lat: place.lat, lon: place.lon };
         shareBtn.classList.add("visible");
-        if (anotherBtn) anotherBtn.classList.add("visible");
         lucide.createIcons();
 
         updateNavigation(userCoords);
@@ -1043,7 +1032,6 @@
           [place.lon, place.lat],
         ];
         shareBtn.classList.add("visible");
-        if (anotherBtn) anotherBtn.classList.add("visible");
         lucide.createIcons();
 
         appState = "TRACKING";
@@ -1220,21 +1208,24 @@
 
       async function selectNextPlace() {
         if (!currentCandidates || currentCandidates.length === 0) {
-          showError("Nessun altro locale disponibile.");
+          startFlow();
           return;
         }
 
         if (currentCandidates.length === 1) {
           statusText.innerHTML =
-            "È l'unico locale trovato nelle vicinanze!";
+            "È l'unico locale trovato nelle vicinanze!<br>Segui la bottiglia!";
+          velocity = SPIN_SPEED * 0.6;
           return;
         }
 
-        if (anotherBtn) anotherBtn.disabled = true;
+        mainBtn.disabled = true;
+        iconSpin.classList.add("searching-anim");
         // Effetto rotazione bottiglia
-        velocity = SPIN_SPEED * 0.7;
+        velocity = SPIN_SPEED;
         targetText.innerHTML = "Cerco un altro locale...";
         if (openingStatusEl) openingStatusEl.innerHTML = "";
+        shareBtn.classList.remove("visible");
 
         if (currentMode === "NEAR") {
           currentCandidateIndex++;
@@ -1255,7 +1246,7 @@
         normalizePlace(nextPlace);
         targetPlaceData = nextPlace;
         await calculateRoute(nextPlace);
-        if (anotherBtn) anotherBtn.disabled = false;
+        mainBtn.disabled = false;
       }
 
       function updateNavigation(currentPos) {
