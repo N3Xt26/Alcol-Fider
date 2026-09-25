@@ -3295,10 +3295,6 @@
         appState = "TRACKING";
         iconSpin.classList.remove("searching-anim");
         mainBtn.disabled = false;
-        if (drunkEffectsEnabled && drinkCount > 0) {
-          syncDiplopiaContent();
-          triggerDiplopia();
-        }
       }
 
       async function calculateRoute(place, minSpinTimeMs = 1300) {
@@ -3347,10 +3343,6 @@
         appState = "TRACKING";
         iconSpin.classList.remove("searching-anim");
         mainBtn.disabled = false;
-        if (drunkEffectsEnabled && drinkCount > 0) {
-          syncDiplopiaContent();
-          triggerDiplopia();
-        }
       }
 
       function normalizePlace(place) {
