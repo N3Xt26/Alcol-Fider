@@ -53,7 +53,9 @@
         align-items: center;
         justify-content: space-evenly;
         text-align: center;
-        overflow: hidden;
+        overflow: visible;
+        position: relative;
+        z-index: 15;
       }
       header {
         margin-top: max(48px, calc(env(safe-area-inset-top, 14px) + 40px));
@@ -104,6 +106,7 @@
       /* Bussola */
       .compass-box {
         position: relative;
+        z-index: 16;
         width: min(54vw, 28vh, 230px);
         height: min(54vw, 28vh, 230px);
         background: #fff;
@@ -115,6 +118,7 @@
         border: 6px solid white;
         flex-shrink: 0;
         cursor: pointer;
+        margin-bottom: 6px;
         transition:
           box-shadow 0.5s ease,
           border-color 0.3s ease;
@@ -137,6 +141,7 @@
         position: relative;
         margin-bottom: clamp(40px, 6vh, 56px);
         z-index: 10;
+        pointer-events: none;
       }
       .distance-card {
         width: 100%;
