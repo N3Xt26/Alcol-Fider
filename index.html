@@ -55,7 +55,11 @@
         text-align: center;
         overflow: visible;
         position: relative;
-        z-index: 15;
+        z-index: 50;
+        pointer-events: none;
+      }
+      #section-stage > * {
+        pointer-events: auto;
       }
       header {
         margin-top: max(48px, calc(env(safe-area-inset-top, 14px) + 40px));
@@ -106,7 +110,7 @@
       /* Bussola */
       .compass-box {
         position: relative;
-        z-index: 16;
+        z-index: 55;
         width: min(54vw, 28vh, 230px);
         height: min(54vw, 28vh, 230px);
         background: #fff;
@@ -210,7 +214,7 @@
         padding-bottom: env(safe-area-inset-bottom, 20px);
         box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.03);
         border-radius: 32px 32px 0 0;
-        z-index: 100;
+        z-index: 20;
       }
       .nav-item {
         flex: 1;
