@@ -1303,6 +1303,41 @@
         pointer-events: auto;
       }
 
+      /* --- BUMP CIN-CIN ACTIVE CONNECTING RING AROUND SCREEN --- */
+      #bump-active-ring {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 2200;
+        border: 4px solid rgba(254, 211, 48, 0.85);
+        box-shadow:
+          inset 0 0 35px rgba(243, 156, 18, 0.65),
+          inset 0 0 15px rgba(254, 211, 48, 0.8),
+          0 0 20px rgba(243, 156, 18, 0.5);
+        opacity: 0;
+        transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        box-sizing: border-box;
+      }
+      #bump-active-ring.active {
+        opacity: 1;
+        animation: bumpRingPulse 1.1s ease-in-out infinite alternate;
+      }
+      @keyframes bumpRingPulse {
+        0% {
+          border-color: rgba(254, 211, 48, 0.7);
+          box-shadow:
+            inset 0 0 25px rgba(243, 156, 18, 0.45),
+            inset 0 0 10px rgba(254, 211, 48, 0.65);
+        }
+        100% {
+          border-color: rgba(255, 177, 66, 0.95);
+          box-shadow:
+            inset 0 0 48px rgba(243, 156, 18, 0.85),
+            inset 0 0 22px rgba(254, 211, 48, 0.95),
+            0 0 25px rgba(243, 156, 18, 0.6);
+        }
+      }
+
       /* --- BUMP CIN-CIN CHEERS MODAL & GLASSES ANIMATION --- */
       .bump-cheers-modal {
         position: fixed;
@@ -1581,6 +1616,9 @@
   <body>
     <!-- Beer Liquid Canvas Overlay -->
     <canvas id="beer-canvas" aria-hidden="true"></canvas>
+
+    <!-- Bump Active Connecting Ring (Attivo durante lo shake per connettersi con smartphone vicini) -->
+    <div id="bump-active-ring" aria-hidden="true"></div>
 
     <div id="calibration-overlay">
       <div id="calib-icon-container">
@@ -4215,10 +4253,32 @@
       const myClientId = "bump_" + Math.random().toString(36).substring(2, 10) + "_" + Date.now();
       let lastShakeTimestamp = 0;
       const SHAKE_THRESHOLD = 20;
-      const SHAKE_COOLDOWN = 3000;
       let lastMotionTotal = 0;
       let isMotionListening = false;
       let cheersCloseTimer = null;
+
+      // Gestione del ring radar attorno allo schermo durante lo shake
+      let bumpRingTimer = null;
+      const BUMP_ACTIVE_WINDOW = 2000; // Il ring e la finestra di connessione restano attivi 2s (o per tutta la durata dello shake)
+      let lastFirebaseBumpTime = 0;
+      const FIREBASE_BUMP_THROTTLE = 900; // Pubblica su Firebase al massimo ogni 0.9s se lo shake continua
+
+      function showBumpActiveRing() {
+        const ring = document.getElementById("bump-active-ring");
+        if (!ring) return;
+        ring.classList.add("active");
+        if (bumpRingTimer) clearTimeout(bumpRingTimer);
+        bumpRingTimer = setTimeout(() => {
+          hideBumpActiveRing();
+        }, BUMP_ACTIVE_WINDOW);
+      }
+
+      function hideBumpActiveRing() {
+        if (bumpRingTimer) clearTimeout(bumpRingTimer);
+        bumpRingTimer = null;
+        const ring = document.getElementById("bump-active-ring");
+        if (ring) ring.classList.remove("active");
+      }
 
       function initFirebaseBump() {
         try {
@@ -4235,10 +4295,10 @@
               const now = Date.now();
               const timeDelta = Math.abs(now - (bump.t || 0));
 
-              // Spec 1: |Date.now() - bump.t| <= 600 ms
-              if (timeDelta > 600) return;
+              // Verifica finestra temporale: mentre il ring è visualizzato (fino a 2000 ms)
+              if (timeDelta > BUMP_ACTIVE_WINDOW) return;
 
-              // Spec 2: Distanza <= 25 metri con formula Haversine
+              // Distanza <= 25 metri con formula Haversine
               if (!userCoords || isNaN(userCoords.lat) || isNaN(userCoords.lon)) return;
               if (typeof bump.lat !== "number" || typeof bump.lon !== "number") return;
 
@@ -4246,6 +4306,7 @@
               if (dist <= 25) {
                 // Il primo client che convalida il match rimuove il record dal database
                 snapshot.ref.remove().catch(() => {});
+                hideBumpActiveRing();
                 triggerCheersAnimation();
               }
             });
@@ -4256,12 +4317,10 @@
       }
 
       function publishBumpEvent() {
-        const now = Date.now();
-        if (now - lastShakeTimestamp < SHAKE_COOLDOWN) return;
-        lastShakeTimestamp = now;
+        showBumpActiveRing();
 
         // Feedback aptico leggero immediato sullo shake
-        if (navigator.vibrate) navigator.vibrate(30);
+        if (navigator.vibrate) navigator.vibrate(35);
 
         const lat = (userCoords && typeof userCoords.lat === "number") ? userCoords.lat : 0;
         const lon = (userCoords && typeof userCoords.lon === "number") ? userCoords.lon : 0;
@@ -4281,28 +4340,27 @@
             // Timeout locale a 2 secondi per non intasare il database
             setTimeout(() => {
               newBumpRef.remove().catch(() => {});
-            }, 2000);
+            }, BUMP_ACTIVE_WINDOW);
           } catch (err) {
             console.warn("Errore pubblicazione bump su Firebase:", err);
           }
         } else {
-          // Se Firebase è offline o con placeholder, mostra la demo locale del Cin-Cin
+          // Se Firebase è offline, mostra la demo locale del Cin-Cin
           triggerCheersAnimation();
         }
       }
 
       function handleDeviceMotion(e) {
-        const now = Date.now();
-        if (now - lastShakeTimestamp < SHAKE_COOLDOWN) return;
-
         let ax = 0, ay = 0, az = 0;
+        let isShake = false;
+
         if (e.acceleration && (e.acceleration.x !== null || e.acceleration.y !== null)) {
           ax = e.acceleration.x || 0;
           ay = e.acceleration.y || 0;
           az = e.acceleration.z || 0;
           const mag = Math.sqrt(ax * ax + ay * ay + az * az);
           if (mag >= SHAKE_THRESHOLD) {
-            publishBumpEvent();
+            isShake = true;
           }
         } else if (e.accelerationIncludingGravity) {
           const gx = e.accelerationIncludingGravity.x || 0;
@@ -4312,6 +4370,17 @@
           const delta = Math.abs(total - (lastMotionTotal || 9.8));
           lastMotionTotal = total;
           if (delta >= SHAKE_THRESHOLD * 0.8) {
+            isShake = true;
+          }
+        }
+
+        if (isShake) {
+          // Mostra il ring dorato attorno allo schermo per tutta la durata dello shake
+          showBumpActiveRing();
+
+          const now = Date.now();
+          if (now - lastFirebaseBumpTime >= FIREBASE_BUMP_THROTTLE) {
+            lastFirebaseBumpTime = now;
             publishBumpEvent();
           }
         }
@@ -4345,6 +4414,8 @@
       }
 
       function triggerCheersAnimation() {
+        hideBumpActiveRing();
+
         const modal = document.getElementById("bump-cheers-modal");
         if (!modal) return;
 
