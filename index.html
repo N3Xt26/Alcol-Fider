@@ -421,6 +421,9 @@
         margin-top: 6px;
         display: flex;
         justify-content: center;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
       }
       .category-chip {
         display: inline-flex;
@@ -444,6 +447,32 @@
       }
       .category-chip i {
         color: var(--text-dim);
+      }
+      .drink-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-main);
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      .drink-chip:active {
+        transform: scale(0.95);
+        background: #f7f5f4;
+      }
+      .drink-chip.drunk-active {
+        background: #fff3bf;
+        border-color: #fab005;
+        color: #d9480f;
+        box-shadow: 0 2px 10px rgba(250, 176, 5, 0.25);
       }
 
       /* Custom Modals (Category & Party) */
@@ -774,6 +803,276 @@
         transform: scale(0.97);
       }
 
+      /* --- DRUNK UI & BUMP SHAKE EFFECTS --- */
+      @keyframes bumpImpactShake {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        15% { transform: translate(-4px, 3px) rotate(-1deg); }
+        30% { transform: translate(4px, -3px) rotate(1deg); }
+        45% { transform: translate(-3px, -2px) rotate(-0.6deg); }
+        60% { transform: translate(3px, 2px) rotate(0.6deg); }
+        75% { transform: translate(-2px, 1px) rotate(-0.3deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+      }
+      body.bump-shake-active {
+        animation: bumpImpactShake 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+      }
+
+      @keyframes drunkSwayMild {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(2px, -2px) rotate(0.5deg); }
+        50% { transform: translate(-2px, 2px) rotate(-0.5deg); }
+        75% { transform: translate(2px, 1px) rotate(0.4deg); }
+      }
+      @keyframes drunkSwayModerate {
+        0%, 100% { transform: translate(0, 0) rotate(0deg) skewX(0deg); }
+        20% { transform: translate(-4px, 3px) rotate(-1deg) skewX(-0.5deg); }
+        40% { transform: translate(4px, -3px) rotate(1.1deg) skewX(0.5deg); }
+        60% { transform: translate(-3px, -2px) rotate(-0.8deg) skewX(-0.4deg); }
+        80% { transform: translate(3px, 3px) rotate(0.9deg) skewX(0.4deg); }
+      }
+      @keyframes drunkSwayHeavy {
+        0%, 100% { transform: translate(0, 0) rotate(0deg) skewX(0deg) scale(1); }
+        20% { transform: translate(-6px, 4px) rotate(-1.7deg) skewX(-1deg) scale(1.008); }
+        40% { transform: translate(5px, -5px) rotate(1.5deg) skewX(1deg) scale(0.994); }
+        60% { transform: translate(-5px, -3px) rotate(-1.3deg) skewX(-0.8deg) scale(1.006); }
+        80% { transform: translate(6px, 4px) rotate(1.6deg) skewX(0.8deg) scale(0.996); }
+      }
+      @keyframes drunkBlurPulseMild {
+        0%, 100% { filter: blur(0px); }
+        50% { filter: blur(0.7px); }
+      }
+      @keyframes drunkBlurPulseModerate {
+        0%, 100% { filter: blur(0px); }
+        50% { filter: blur(1.3px); }
+      }
+      @keyframes drunkBlurPulseHeavy {
+        0%, 100% { filter: blur(0.3px); }
+        50% { filter: blur(2.2px); }
+      }
+
+      body.drunk-lvl-1 #section-stage {
+        animation: drunkSwayMild 7s ease-in-out infinite, drunkBlurPulseMild 4.5s ease-in-out infinite;
+      }
+      body.drunk-lvl-2 #section-stage {
+        animation: drunkSwayModerate 5.5s ease-in-out infinite, drunkBlurPulseModerate 3.8s ease-in-out infinite;
+      }
+      body.drunk-lvl-2 h1#target-name,
+      body.drunk-lvl-2 #status {
+        text-shadow: -1px 0 rgba(224, 124, 106, 0.45), 1px 0 rgba(133, 180, 148, 0.45);
+      }
+      body.drunk-lvl-3 #section-stage {
+        animation: drunkSwayModerate 4.2s ease-in-out infinite, drunkBlurPulseHeavy 3.2s ease-in-out infinite;
+      }
+      body.drunk-lvl-3 h1#target-name,
+      body.drunk-lvl-3 #status,
+      body.drunk-lvl-3 .distance-title {
+        text-shadow: -1.8px 0 rgba(224, 124, 106, 0.65), 1.8px 0 rgba(108, 92, 231, 0.55);
+      }
+      body.drunk-lvl-4 #section-stage {
+        animation: drunkSwayHeavy 3.4s ease-in-out infinite, drunkBlurPulseHeavy 2.5s ease-in-out infinite;
+      }
+      body.drunk-lvl-4 h1#target-name,
+      body.drunk-lvl-4 #status,
+      body.drunk-lvl-4 .distance-title,
+      body.drunk-lvl-4 #app-label {
+        text-shadow: -2.5px 0 rgba(224, 124, 106, 0.8), 2.5px 0 rgba(9, 132, 227, 0.7);
+      }
+
+      /* Modal Ubriacometro Bump Style */
+      .drunk-modal-card {
+        background: white;
+        width: 100%;
+        max-width: 310px;
+        border-radius: 26px;
+        padding: 18px 16px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .drunk-main-hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 4px 0 6px;
+      }
+      .drunk-bump-btn {
+        background: linear-gradient(145deg, #ff7675, #e07c6a);
+        color: white;
+        border: none;
+        width: 125px;
+        height: 125px;
+        border-radius: 34px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        cursor: pointer;
+        box-shadow: 0 10px 24px rgba(224, 124, 106, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+        transition: transform 0.12s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.15s ease;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .drunk-bump-btn:active {
+        transform: scale(0.91) rotate(-2deg);
+        box-shadow: 0 4px 12px rgba(224, 124, 106, 0.3);
+      }
+      .drunk-bump-icon {
+        font-size: 2.6rem;
+        line-height: 1;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+        transition: transform 0.15s ease;
+      }
+      .drunk-bump-btn:active .drunk-bump-icon {
+        transform: scale(1.15) rotate(8deg);
+      }
+      .drunk-bump-txt {
+        font-size: 0.85rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      .drunk-stats-box {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .drunk-count-number {
+        font-size: 2.4rem;
+        font-weight: 900;
+        line-height: 1;
+        color: var(--text-main);
+        letter-spacing: -1px;
+      }
+      .drunk-count-sub {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+      }
+      .drunk-level-badge {
+        margin-top: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.80rem;
+        font-weight: 800;
+        background: #f1f2f6;
+        color: #2f3542;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+      }
+      .drunk-actions-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        padding-top: 10px;
+      }
+      .drunk-stepper-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+      }
+      .drunk-stepper-btn {
+        background: #f1f2f6;
+        color: var(--text-main);
+        border: none;
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        flex: 1;
+        transition: transform 0.12s ease, background 0.15s ease;
+      }
+      .drunk-stepper-btn:active {
+        transform: scale(0.95);
+        background: #e4e7eb;
+      }
+      .drunk-reset-btn {
+        background: rgba(9, 132, 227, 0.1);
+        color: #0984e3;
+        border: none;
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 0.80rem;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        flex: 1.2;
+        transition: transform 0.12s ease, background 0.15s ease;
+      }
+      .drunk-reset-btn:active {
+        transform: scale(0.95);
+        background: rgba(9, 132, 227, 0.18);
+      }
+      .drunk-toggle-row {
+        background: #f8f9fa;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 14px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .drunk-toggle-info {
+        display: flex;
+        flex-direction: column;
+      }
+      .drunk-toggle-label {
+        font-size: 0.80rem;
+        font-weight: 800;
+        color: var(--text-main);
+      }
+      .drunk-toggle-hint {
+        font-size: 0.68rem;
+        font-weight: 600;
+        color: var(--text-dim);
+      }
+      .drunk-switch-btn {
+        width: 44px;
+        height: 26px;
+        border-radius: 20px;
+        background: #b2bec3;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        transition: background 0.2s ease;
+        padding: 2px;
+      }
+      .drunk-switch-btn.active {
+        background: var(--accent);
+      }
+      .drunk-switch-slider {
+        display: block;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform: translateX(0);
+      }
+      .drunk-switch-btn.active .drunk-switch-slider {
+        transform: translateX(18px);
+      }
+
       #error-box {
         position: fixed;
         top: 50%;
@@ -906,6 +1205,10 @@
             <span id="category-chip-label">Tutti i locali</span>
             <i data-lucide="chevron-down" width="12" height="12"></i>
           </button>
+          <button id="btn-drink-counter" class="drink-chip" type="button" aria-label="Ubriacometro e contatore drink" title="Ubriacometro">
+            <span id="drink-chip-icon">🍺</span>
+            <span id="drink-chip-count">0 drink</span>
+          </button>
         </div>
       </header>
       <div class="compass-box" id="compass-box">
@@ -952,6 +1255,63 @@
       <h3>Oops!</h3>
       <p id="error-msg">Nessun locale trovato.</p>
       <button class="retry-btn" onclick="closeError()">RIPROVA</button>
+    </div>
+
+    <!-- Modal Ubriacometro (Bump Style) -->
+    <div id="drunk-modal" class="custom-modal-backdrop">
+      <div class="drunk-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="party-icon-bubble">🍺</span>
+            <div>
+              <h3>Ubriacometro</h3>
+              <p>Stile Bump: tocca per aggiungere!</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="btn-close-drunk" type="button" aria-label="Chiudi">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+
+        <div class="drunk-main-hero">
+          <button id="btn-drunk-tap" class="drunk-bump-btn" type="button" aria-label="Aggiungi un drink">
+            <div class="drunk-bump-icon">🍺</div>
+            <div class="drunk-bump-txt">+1 DRINK</div>
+          </button>
+          <div class="drunk-stats-box">
+            <div class="drunk-count-number" id="drunk-count-display">0</div>
+            <div class="drunk-count-sub">drink bevuti</div>
+            <div class="drunk-level-badge" id="drunk-level-badge">Sobrio 😇</div>
+          </div>
+        </div>
+
+        <div class="drunk-actions-panel">
+          <div class="drunk-stepper-row">
+            <button id="btn-drunk-minus" class="drunk-stepper-btn" type="button" title="Togli 1 drink">
+              <i data-lucide="minus" width="16" height="16"></i>
+              <span>-1</span>
+            </button>
+            <button id="btn-drunk-plus" class="drunk-stepper-btn" type="button" title="Aggiungi 1 drink">
+              <i data-lucide="plus" width="16" height="16"></i>
+              <span>+1</span>
+            </button>
+            <button id="btn-drunk-reset" class="drunk-reset-btn" type="button" title="Azzera e torna sobrio">
+              <i data-lucide="droplet" width="16" height="16"></i>
+              <span>Azzera</span>
+            </button>
+          </div>
+
+          <div class="drunk-toggle-row">
+            <div class="drunk-toggle-info">
+              <span class="drunk-toggle-label">Effetti Visivi Drunk</span>
+              <span class="drunk-toggle-hint">Shake, sades e oscillazione</span>
+            </div>
+            <button id="btn-drunk-toggle-fx" class="drunk-switch-btn active" type="button" role="switch" aria-checked="true" title="Attiva o disattiva effetti ubriaco">
+              <span class="drunk-switch-slider"></span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Modal Categoria Bevuta -->
@@ -1116,6 +1476,20 @@
       const closeCategoryBtn = document.getElementById("btn-close-category");
       const categoryOptionBtns = document.querySelectorAll(".category-option-btn");
 
+      const drinkCounterBtn = document.getElementById("btn-drink-counter");
+      const drinkChipIcon = document.getElementById("drink-chip-icon");
+      const drinkChipCount = document.getElementById("drink-chip-count");
+
+      const drunkModal = document.getElementById("drunk-modal");
+      const closeDrunkBtn = document.getElementById("btn-close-drunk");
+      const drunkTapBtn = document.getElementById("btn-drunk-tap");
+      const drunkCountDisplay = document.getElementById("drunk-count-display");
+      const drunkLevelBadge = document.getElementById("drunk-level-badge");
+      const drunkMinusBtn = document.getElementById("btn-drunk-minus");
+      const drunkPlusBtn = document.getElementById("btn-drunk-plus");
+      const drunkResetBtn = document.getElementById("btn-drunk-reset");
+      const drunkToggleFxBtn = document.getElementById("btn-drunk-toggle-fx");
+
       const partyModal = document.getElementById("party-modal");
       const closePartyBtn = document.getElementById("btn-close-party");
       const partyNameInput = document.getElementById("party-name-input");
@@ -1134,10 +1508,14 @@
       );
       const calibManualBtn = document.getElementById("calib-manual-btn");
 
-      // --- NUOVI STATI (Audio, Filtri, Blacklist, Party) ---
+      // --- NUOVI STATI (Audio, Filtri, Blacklist, Party, Ubriacometro) ---
       let isAudioMuted = localStorage.getItem("alcol_muted") === "true";
       let currentCategory = "all";
       const sessionBlacklist = new Set();
+
+      let drinkCount = parseInt(localStorage.getItem("alcol_drink_count") || "0", 10);
+      if (isNaN(drinkCount) || drinkCount < 0) drinkCount = 0;
+      let drunkEffectsEnabled = localStorage.getItem("alcol_drunk_effects") !== "false";
 
       // --- SOUND ENGINE (Web Audio API) ---
       let audioCtx = null;
@@ -1269,6 +1647,63 @@
             
             osc.start(start);
             osc.stop(start + 0.13);
+          });
+        } catch (e) {}
+      }
+
+      function playDrinkSound() {
+        if (isAudioMuted) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          // Glass clink
+          const osc1 = ctx.createOscillator();
+          const gain1 = ctx.createGain();
+          osc1.type = "sine";
+          osc1.frequency.setValueAtTime(1400, now);
+          osc1.frequency.exponentialRampToValueAtTime(700, now + 0.15);
+          gain1.gain.setValueAtTime(0.2, now);
+          gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc1.connect(gain1);
+          gain1.connect(ctx.destination);
+          osc1.start(now);
+          osc1.stop(now + 0.16);
+
+          // Pop bubble
+          const osc2 = ctx.createOscillator();
+          const gain2 = ctx.createGain();
+          osc2.type = "triangle";
+          osc2.frequency.setValueAtTime(320, now + 0.04);
+          osc2.frequency.exponentialRampToValueAtTime(820, now + 0.14);
+          gain2.gain.setValueAtTime(0.18, now + 0.04);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc2.connect(gain2);
+          gain2.connect(ctx.destination);
+          osc2.start(now + 0.04);
+          osc2.stop(now + 0.15);
+        } catch (e) {}
+      }
+
+      function playSoberSound() {
+        if (isAudioMuted) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          const notes = [659.25, 880, 1174.66]; // E5, A5, D6
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const start = now + i * 0.08;
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.16, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + 0.3);
           });
         } catch (e) {}
       }
@@ -1590,6 +2025,117 @@
         requestAnimationFrame(animateWheel);
       }
 
+      // --- UBRIACOMETRO & DRUNK UI (BUMP STYLE) ---
+      const drunkMilestones = [
+        { max: 0, text: "Sobrio 😇", color: "#2f3542", bg: "#f1f2f6", icon: "🍺" },
+        { max: 2, text: "Un po' brillo ✨", color: "#d35400", bg: "#fef5e7", icon: "🍻" },
+        { max: 4, text: "Bello allegro 🥳", color: "#c0392b", bg: "#fdedec", icon: "🍹" },
+        { max: 6, text: "Molto sbronzo 😵‍💫", color: "#8e44ad", bg: "#f4ecf7", icon: "🍾" },
+        { max: 9999, text: "In orbita 🚀", color: "#2c3e50", bg: "#ebedef", icon: "🛸" },
+      ];
+
+      function getDrunkMilestone(count) {
+        for (const m of drunkMilestones) {
+          if (count <= m.max) return m;
+        }
+        return drunkMilestones[drunkMilestones.length - 1];
+      }
+
+      let bumpShakeTimer = null;
+      function triggerBumpShake() {
+        document.body.classList.remove("bump-shake-active");
+        void document.body.offsetWidth; // force reflow
+        document.body.classList.add("bump-shake-active");
+        if (bumpShakeTimer) clearTimeout(bumpShakeTimer);
+        bumpShakeTimer = setTimeout(() => {
+          document.body.classList.remove("bump-shake-active");
+        }, 340);
+      }
+
+      function updateDrunkUI() {
+        const milestone = getDrunkMilestone(drinkCount);
+
+        // Update Header Chip
+        if (drinkChipCount) {
+          drinkChipCount.innerText = `${drinkCount} drink`;
+        }
+        if (drinkChipIcon) {
+          drinkChipIcon.innerText = milestone.icon;
+        }
+        if (drinkCounterBtn) {
+          drinkCounterBtn.classList.toggle("drunk-active", drinkCount > 0);
+        }
+
+        // Update Modal elements
+        if (drunkCountDisplay) {
+          drunkCountDisplay.innerText = drinkCount;
+        }
+        if (drunkLevelBadge) {
+          drunkLevelBadge.innerText = milestone.text;
+          drunkLevelBadge.style.color = milestone.color;
+          drunkLevelBadge.style.backgroundColor = milestone.bg;
+        }
+        if (drunkToggleFxBtn) {
+          drunkToggleFxBtn.classList.toggle("active", drunkEffectsEnabled);
+          drunkToggleFxBtn.setAttribute("aria-checked", drunkEffectsEnabled ? "true" : "false");
+        }
+
+        // Update Drunk Classes on Body
+        document.body.classList.remove("drunk-lvl-1", "drunk-lvl-2", "drunk-lvl-3", "drunk-lvl-4");
+        if (drunkEffectsEnabled && drinkCount > 0) {
+          if (drinkCount <= 2) {
+            document.body.classList.add("drunk-lvl-1");
+          } else if (drinkCount <= 4) {
+            document.body.classList.add("drunk-lvl-2");
+          } else if (drinkCount <= 6) {
+            document.body.classList.add("drunk-lvl-3");
+          } else {
+            document.body.classList.add("drunk-lvl-4");
+          }
+        }
+      }
+
+      function openDrunkModal() {
+        if (drunkModal) drunkModal.classList.add("open");
+      }
+
+      function closeDrunkModal() {
+        if (drunkModal) drunkModal.classList.remove("open");
+      }
+
+      function addDrink() {
+        drinkCount++;
+        localStorage.setItem("alcol_drink_count", drinkCount);
+        playDrinkSound();
+        triggerBumpShake();
+        if (navigator.vibrate) navigator.vibrate(35);
+        updateDrunkUI();
+      }
+
+      function removeDrink() {
+        if (drinkCount > 0) {
+          drinkCount--;
+          localStorage.setItem("alcol_drink_count", drinkCount);
+          if (navigator.vibrate) navigator.vibrate(15);
+          updateDrunkUI();
+        }
+      }
+
+      function resetDrinks() {
+        drinkCount = 0;
+        localStorage.setItem("alcol_drink_count", "0");
+        playSoberSound();
+        if (navigator.vibrate) navigator.vibrate([40, 30, 80]);
+        updateDrunkUI();
+      }
+
+      function toggleDrunkEffects() {
+        drunkEffectsEnabled = !drunkEffectsEnabled;
+        localStorage.setItem("alcol_drunk_effects", drunkEffectsEnabled ? "true" : "false");
+        if (navigator.vibrate) navigator.vibrate(20);
+        updateDrunkUI();
+      }
+
       // --- SENSORI ---
       let compassNeedsCalib = false;
       window.addEventListener("compassneedscalibration", (e) => {
@@ -1687,7 +2233,21 @@
         });
       });
 
+      if (drinkCounterBtn) drinkCounterBtn.addEventListener("click", openDrunkModal);
+      if (closeDrunkBtn) closeDrunkBtn.addEventListener("click", closeDrunkModal);
+      if (drunkModal) {
+        drunkModal.addEventListener("click", (e) => {
+          if (e.target === drunkModal) closeDrunkModal();
+        });
+      }
+      if (drunkTapBtn) drunkTapBtn.addEventListener("click", addDrink);
+      if (drunkPlusBtn) drunkPlusBtn.addEventListener("click", addDrink);
+      if (drunkMinusBtn) drunkMinusBtn.addEventListener("click", removeDrink);
+      if (drunkResetBtn) drunkResetBtn.addEventListener("click", resetDrinks);
+      if (drunkToggleFxBtn) drunkToggleFxBtn.addEventListener("click", toggleDrunkEffects);
+
       updateSoundBtnUI();
+      updateDrunkUI();
       drawPartyWheel();
       lucide.createIcons();
       requestAnimationFrame(physicsLoop);
@@ -2470,7 +3030,12 @@
           velocity *= Math.pow(0.92, dt);
         }
         angle += velocity * dt;
-        bottleImg.style.transform = `rotate(${angle}deg)`;
+        let displayAngle = angle;
+        if (drunkEffectsEnabled && drinkCount >= 2) {
+          const wobbleAmp = Math.min(12, (drinkCount - 1) * 2.8);
+          displayAngle += Math.sin(currentTime * 0.003) * wobbleAmp;
+        }
+        bottleImg.style.transform = `rotate(${displayAngle}deg)`;
 
         // --- AUDIO & HAPTIC TICKS ---
         const speed = Math.abs(velocity);
