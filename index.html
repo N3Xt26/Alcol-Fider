@@ -4199,13 +4199,14 @@
       // =========================================================================
 
       const firebaseConfig = {
-        apiKey: "AIzaSy_INSERISCI_QUI_LA_TUA_API_KEY",
-        authDomain: "drink-compass-bump.firebaseapp.com",
-        databaseURL: "https://drink-compass-bump-default-rtdb.firebaseio.com",
-        projectId: "drink-compass-bump",
-        storageBucket: "drink-compass-bump.appspot.com",
-        messagingSenderId: "1234567890",
-        appId: "1:1234567890:web:abcdef1234567890"
+        apiKey: "AIzaSyBARmUF5r1CqVyKx_wLHTyE1QV4cMuiVR0",
+        authDomain: "alcol-finder.firebaseapp.com",
+        databaseURL: "https://alcol-finder-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "alcol-finder",
+        storageBucket: "alcol-finder.firebasestorage.app",
+        messagingSenderId: "683272550925",
+        appId: "1:683272550925:web:42a8e317ec35334f8e7344",
+        measurementId: "G-MRZ8RY0JRF"
       };
 
       let firebaseApp = null;
@@ -4222,12 +4223,8 @@
       function initFirebaseBump() {
         try {
           if (typeof firebase !== "undefined" && firebase.initializeApp) {
-            const isPlaceholder = !firebaseConfig.apiKey || firebaseConfig.apiKey.includes("INSERISCI");
-            if (isPlaceholder) {
-              console.info("Firebase Realtime DB: placeholder configurato. Per il matching multi-telefono inserisci le credenziali del tuo database Firebase in firebaseConfig.");
-            }
             firebaseApp = firebase.apps && firebase.apps.length ? firebase.apps[0] : firebase.initializeApp(firebaseConfig);
-            firebaseDb = firebase.database();
+            firebaseDb = firebase.app().database(firebaseConfig.databaseURL);
             activeBumpsRef = firebaseDb.ref("active_bumps");
 
             // Listener in tempo reale per convalidare i bump di altri client
