@@ -849,29 +849,7 @@
         50% { filter: blur(0.95px); }
       }
 
-      /* Rainbow Glow Ring & Chromatic Animations */
-      @keyframes rainbowHueRotate {
-        0% { filter: hue-rotate(0deg); }
-        100% { filter: hue-rotate(360deg); }
-      }
-      @keyframes rainbowRingPulse {
-        0%, 100% { opacity: 0.75; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.002); }
-      }
-      @keyframes drunkCompassPulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.02); }
-      }
 
-      .rainbow-glow-ring {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 1500;
-        opacity: 0;
-        transition: opacity 0.6s ease, box-shadow 0.6s ease;
-        box-sizing: border-box;
-      }
 
       /* Beer Liquid Viewport Canvas */
       #beer-canvas {
@@ -918,6 +896,13 @@
         padding: 0 16px;
         pointer-events: none;
       }
+
+      /* Rende l'immagine fantasma della bottiglia leggermente più compatta (es. 85%) */
+      .drunk-ghost-compass img {
+        transform-origin: center center;
+        scale: 0.85; /* Se vuoi ridurla ancora, prova 0.80 */
+      }
+
       .drunk-diplopia-ghost.diplopia-active {
         visibility: visible;
         animation: drunkDiplopiaBurst 4.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -988,10 +973,6 @@
       body.drunk-lvl-1 #section-stage {
         animation: drunkSwayMild 7s ease-in-out infinite, drunkBlurPulseMild 4.5s ease-in-out infinite;
       }
-      body.drunk-lvl-1 .rainbow-glow-ring {
-        opacity: 0.55;
-        box-shadow: inset 0 0 24px rgba(253, 203, 110, 0.45), inset 0 0 8px rgba(255, 118, 117, 0.35);
-      }
 
       /* Drunk Level 2 (3-4 drinks) */
       body.drunk-lvl-2 #section-stage {
@@ -1000,14 +981,6 @@
       body.drunk-lvl-2 h1#target-name,
       body.drunk-lvl-2 #status {
         text-shadow: -0.6px 0 rgba(224, 124, 106, 0.4), 0.6px 0 rgba(133, 180, 148, 0.4);
-      }
-      body.drunk-lvl-2 .rainbow-glow-ring {
-        opacity: 0.75;
-        box-shadow:
-          inset 0 0 35px rgba(224, 124, 106, 0.5),
-          inset 0 0 18px rgba(108, 92, 231, 0.4),
-          inset 0 0 8px rgba(253, 203, 110, 0.45);
-        animation: rainbowHueRotate 8s linear infinite;
       }
       body.drunk-lvl-2 .distance-card {
         box-shadow: 0 8px 28px rgba(224, 124, 106, 0.22), 0 0 14px rgba(108, 92, 231, 0.16) !important;
@@ -1021,15 +994,6 @@
       body.drunk-lvl-3 #status,
       body.drunk-lvl-3 .distance-title {
         text-shadow: -0.9px 0 rgba(224, 124, 106, 0.5), 0.9px 0 rgba(108, 92, 231, 0.4);
-      }
-      body.drunk-lvl-3 .rainbow-glow-ring {
-        opacity: 0.88;
-        box-shadow:
-          inset 0 0 48px rgba(255, 71, 87, 0.6),
-          inset 0 0 30px rgba(255, 165, 2, 0.55),
-          inset 0 0 18px rgba(46, 213, 115, 0.5),
-          inset 0 0 10px rgba(30, 144, 255, 0.55);
-        animation: rainbowHueRotate 5s linear infinite, rainbowRingPulse 3.5s ease-in-out infinite;
       }
       body.drunk-lvl-3 .distance-card {
         box-shadow: 0 10px 32px rgba(255, 71, 87, 0.3), 0 0 18px rgba(46, 213, 115, 0.22) !important;
@@ -1353,8 +1317,6 @@
     </style>
   </head>
   <body>
-    <!-- Rainbow Glow Ring overlay (Drunk UI) -->
-    <div id="rainbow-glow-ring" class="rainbow-glow-ring" aria-hidden="true"></div>
     <!-- Beer Liquid Canvas Overlay -->
     <canvas id="beer-canvas" aria-hidden="true"></canvas>
 
@@ -2342,9 +2304,11 @@
         if (!ghost) return;
 
         const effective = Math.min(drinkCount, 8);
-        const shiftX = -Math.round(7 + effective * 2.1);
-        const shiftY = Math.round(13 + effective * 3.0);
-        const rotDeg = -(0.7 + effective * 0.28).toFixed(2);
+
+        const shiftX = -Math.round(2 + effective * 0.8);
+        const shiftY = Math.round(3 + effective * 1.0);
+        const rotDeg = -(0.3 + effective * 0.12).toFixed(2);
+
         const opacityVal = Math.min(0.62, 0.36 + effective * 0.045).toFixed(2);
 
         ghost.style.setProperty("--diplopia-x", `${shiftX}px`);
