@@ -2366,7 +2366,6 @@
         updateDrunkUI();
         triggerBeerPour(drinkCount);
         triggerDiplopia();
-        triggerModalDiplopia();
       }
 
       function removeDrink() {
@@ -2376,11 +2375,7 @@
           if (navigator.vibrate) navigator.vibrate(15);
           updateDrunkUI();
           triggerBeerPour(drinkCount);
-          if (drinkCount > 0) {
-            triggerDiplopia();
-          } else {
-            clearDiplopia();
-          }
+          // RIMOSSO triggerDiplopia() da qui!
         }
       }
 
@@ -2404,7 +2399,7 @@
           clearDiplopia();
         } else if (drinkCount > 0) {
           triggerBeerPour(drinkCount);
-          triggerDiplopia();
+          // RIMOSSO triggerDiplopia() da qui!
         }
       }
 
