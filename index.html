@@ -881,9 +881,6 @@
         opacity: 0.55;
         box-shadow: inset 0 0 24px rgba(253, 203, 110, 0.45), inset 0 0 8px rgba(255, 118, 117, 0.35);
       }
-      body.drunk-lvl-1 .compass-box {
-        box-shadow: 0 0 25px rgba(253, 203, 110, 0.35) !important;
-      }
 
       /* Drunk Level 2 (3-4 drinks) */
       body.drunk-lvl-2 #section-stage {
@@ -900,9 +897,6 @@
           inset 0 0 18px rgba(108, 92, 231, 0.4),
           inset 0 0 8px rgba(253, 203, 110, 0.45);
         animation: rainbowHueRotate 8s linear infinite;
-      }
-      body.drunk-lvl-2 .compass-box {
-        box-shadow: 0 0 30px rgba(224, 124, 106, 0.4), 0 0 15px rgba(108, 92, 231, 0.3) !important;
       }
       body.drunk-lvl-2 .distance-card {
         box-shadow: 0 8px 28px rgba(224, 124, 106, 0.22), 0 0 14px rgba(108, 92, 231, 0.16) !important;
@@ -925,10 +919,6 @@
           inset 0 0 18px rgba(46, 213, 115, 0.5),
           inset 0 0 10px rgba(30, 144, 255, 0.55);
         animation: rainbowHueRotate 5s linear infinite, rainbowRingPulse 3.5s ease-in-out infinite;
-      }
-      body.drunk-lvl-3 .compass-box {
-        box-shadow: 0 0 40px rgba(255, 71, 87, 0.55), 0 0 22px rgba(46, 213, 115, 0.45), 0 0 14px rgba(30, 144, 255, 0.5) !important;
-        animation: rainbowHueRotate 5s linear infinite;
       }
       body.drunk-lvl-3 .distance-card {
         box-shadow: 0 10px 32px rgba(255, 71, 87, 0.3), 0 0 18px rgba(46, 213, 115, 0.22) !important;
@@ -958,14 +948,6 @@
           inset 0 0 16px rgba(112, 161, 255, 0.65),
           inset 0 0 8px rgba(155, 89, 182, 0.7);
         animation: rainbowHueRotate 3.5s linear infinite, rainbowRingPulse 2.5s ease-in-out infinite;
-      }
-      body.drunk-lvl-4 .compass-box {
-        box-shadow:
-          0 0 48px rgba(255, 71, 87, 0.65),
-          0 0 30px rgba(255, 165, 2, 0.6),
-          0 0 18px rgba(46, 213, 115, 0.5),
-          0 0 14px rgba(112, 161, 255, 0.6) !important;
-        animation: rainbowHueRotate 3.5s linear infinite, drunkCompassPulse 2.5s ease-in-out infinite;
       }
       body.drunk-lvl-4 .distance-card {
         box-shadow: 0 12px 38px rgba(255, 71, 87, 0.38), 0 0 20px rgba(255, 165, 2, 0.3), 0 0 14px rgba(30, 144, 255, 0.3) !important;
@@ -3085,15 +3067,13 @@
 
       function updateVisualFeedback(distance) {
         let intensity = Math.max(0, Math.min(1, 1 - (distance - 50) / 450));
+        compassBox.style.boxShadow = "0 10px 40px rgba(0, 0, 0, 0.04)";
         if (distance > 500) {
-          compassBox.style.boxShadow = `0 0 20px var(--cold)`;
           compassBox.style.borderColor = "var(--cold)";
         } else {
           if (distance < 100) {
-            compassBox.style.boxShadow = `0 0 ${20 + intensity * 30}px var(--hot)`;
             compassBox.style.borderColor = "var(--hot)";
           } else {
-            compassBox.style.boxShadow = `0 10px 40px rgba(0, 0, 0, 0.1)`;
             compassBox.style.borderColor = "white";
           }
         }
