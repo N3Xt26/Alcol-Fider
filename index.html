@@ -8,6 +8,9 @@
     />
     <title>Drink Compass 6.4 - Haptic Found</title>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Firebase Realtime Database SDK (Client-to-Client Bump Matching) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
       /* --- CONFIGURAZIONE COLORI (Natural Palette) --- */
       :root {
@@ -1299,6 +1302,280 @@
         opacity: 1;
         pointer-events: auto;
       }
+
+      /* --- BUMP CIN-CIN CHEERS MODAL & GLASSES ANIMATION --- */
+      .bump-cheers-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 3000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(18, 20, 24, 0.62);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        opacity: 0;
+        transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        padding: 20px;
+        box-sizing: border-box;
+      }
+      .bump-cheers-modal.open {
+        display: flex;
+        opacity: 1;
+      }
+      .bump-cheers-modal.closing {
+        opacity: 0;
+        transition: opacity 0.4s ease;
+      }
+      .cheers-card {
+        background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.98), rgba(253, 247, 240, 0.95));
+        width: 100%;
+        max-width: 320px;
+        border-radius: 28px;
+        padding: 24px 20px 22px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35), 0 0 40px rgba(243, 156, 18, 0.25);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.8);
+      }
+      .cheers-card::before {
+        content: '';
+        position: absolute;
+        inset: -50%;
+        background: radial-gradient(circle, rgba(254, 211, 48, 0.15), transparent 70%);
+        pointer-events: none;
+      }
+      .cheers-stage {
+        position: relative;
+        width: 260px;
+        height: 155px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+      }
+      .cheers-glass-wrapper {
+        position: absolute;
+        width: 95px;
+        height: 145px;
+        top: 6px;
+      }
+      .glass-wrap-left {
+        left: 20px;
+        transform-origin: 50% 90%;
+      }
+      .glass-wrap-right {
+        right: 20px;
+        transform-origin: 50% 90%;
+      }
+
+      /* Slide and Toasting Collision Animations (tilt 20deg and -20deg) */
+      .bump-cheers-modal.open .glass-wrap-left {
+        animation: glassClinkLeft 0.52s cubic-bezier(0.2, 0.8, 0.2, 1.25) forwards;
+      }
+      .bump-cheers-modal.open .glass-wrap-right {
+        animation: glassClinkRight 0.52s cubic-bezier(0.2, 0.8, 0.2, 1.25) forwards;
+      }
+
+      @keyframes glassClinkLeft {
+        0% {
+          transform: translateX(-120px) rotate(-16deg);
+          opacity: 0;
+        }
+        60% {
+          transform: translateX(25px) rotate(22deg);
+          opacity: 1;
+        }
+        78% {
+          transform: translateX(18px) rotate(17deg);
+        }
+        100% {
+          transform: translateX(22px) rotate(20deg);
+          opacity: 1;
+        }
+      }
+
+      @keyframes glassClinkRight {
+        0% {
+          transform: translateX(120px) rotate(16deg);
+          opacity: 0;
+        }
+        60% {
+          transform: translateX(-25px) rotate(-22deg);
+          opacity: 1;
+        }
+        78% {
+          transform: translateX(-18px) rotate(-17deg);
+        }
+        100% {
+          transform: translateX(-22px) rotate(-20deg);
+          opacity: 1;
+        }
+      }
+
+      .cheers-glass-svg {
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.18));
+      }
+
+      /* Golden Sparks / Particles */
+      .cheers-sparks-container {
+        position: absolute;
+        top: 48px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 10px;
+        height: 10px;
+        pointer-events: none;
+        z-index: 10;
+      }
+      .spark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffffff 15%, #ffd32a 65%, #ff793f 100%);
+        box-shadow: 0 0 10px #ffd32a, 0 0 16px #ff9f1a;
+        opacity: 0;
+        transform: translate(-50%, -50%);
+      }
+      .bump-cheers-modal.impact-active .spark {
+        animation: sparkRadiate 0.85s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+      }
+
+      .spark.s1  { --dx: 0px;   --dy: -56px; --scale: 1.25; }
+      .spark.s2  { --dx: 38px;  --dy: -42px; --scale: 0.95; }
+      .spark.s3  { --dx: 54px;  --dy: -10px; --scale: 1.15; }
+      .spark.s4  { --dx: 42px;  --dy: 28px;  --scale: 0.85; }
+      .spark.s5  { --dx: 12px;  --dy: 52px;  --scale: 1.05; }
+      .spark.s6  { --dx: -16px; --dy: 54px;  --scale: 0.90; }
+      .spark.s7  { --dx: -45px; --dy: 26px;  --scale: 1.10; }
+      .spark.s8  { --dx: -56px; --dy: -12px; --scale: 0.85; }
+      .spark.s9  { --dx: -36px; --dy: -44px; --scale: 1.20; }
+      .spark.s10 { --dx: 22px;  --dy: -60px; --scale: 1.00; }
+      .spark.s11 { --dx: -22px; --dy: -58px; --scale: 1.05; }
+      .spark.s12 { --dx: 0px;   --dy: -30px; --scale: 1.35; }
+
+      @keyframes sparkRadiate {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(0.2);
+        }
+        25% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(var(--scale));
+        }
+      }
+
+      /* Text and Badges */
+      .cheers-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #f39c12, #e67e22);
+        color: #ffffff;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.35);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+      }
+      .cheers-title {
+        font-size: 1.32rem;
+        font-weight: 800;
+        color: #2d3436;
+        margin: 0 0 4px;
+        letter-spacing: -0.3px;
+      }
+      .cheers-subtitle {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #636e72;
+        margin: 0;
+      }
+
+      /* Quick test cheers button in drunk modal */
+      .drunk-cheers-quick-btn {
+        margin-top: 8px;
+        background: rgba(243, 156, 18, 0.12);
+        color: #d35400;
+        border: 1px dashed rgba(243, 156, 18, 0.4);
+        border-radius: 12px;
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 100%;
+        transition: transform 0.12s ease, background 0.15s ease;
+      }
+      .drunk-cheers-quick-btn:active {
+        transform: scale(0.96);
+        background: rgba(243, 156, 18, 0.22);
+      }
+
+      /* Motion Permission Banner (iOS Safari / Streamlit Iframe) */
+      .motion-perm-banner {
+        position: fixed;
+        top: max(12px, env(safe-area-inset-top, 12px));
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2500;
+        background: rgba(45, 52, 54, 0.94);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: white;
+        padding: 7px 14px;
+        border-radius: 999px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        max-width: 90vw;
+        animation: fadeInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+      }
+      .motion-perm-banner.hidden {
+        display: none !important;
+      }
+      .motion-perm-content {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .motion-perm-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      @keyframes fadeInDown {
+        from { opacity: 0; transform: translate(-50%, -15px); }
+        to { opacity: 1; transform: translate(-50%, 0); }
+      }
     </style>
   </head>
   <body>
@@ -1448,6 +1725,11 @@
             </button>
           </div>
 
+          <button id="btn-test-cheers" class="drunk-cheers-quick-btn" type="button" title="Testa il brindisi Cin-Cin Bump">
+            <span>🥂</span>
+            <span>Test Brindisi Cin-Cin</span>
+          </button>
+
           <div class="drunk-toggle-row">
             <div class="drunk-toggle-info">
               <span class="drunk-toggle-label">Effetti Visivi Drunk</span>
@@ -1559,6 +1841,97 @@
           <button id="btn-party-done" class="party-done-action-btn" type="button" style="display:none;">
             CERCA UN LOCALE ➔
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- iOS / Streamlit Motion Permission Banner -->
+    <div id="motion-perm-banner" class="motion-perm-banner" style="display: none;">
+      <div class="motion-perm-content">
+        <span>🥂</span>
+        <span>Abilita il Cin-Cin Bump tra smartphone</span>
+      </div>
+      <button id="btn-grant-motion" class="motion-perm-btn" type="button">ATTIVA</button>
+    </div>
+
+    <!-- Modal Cin-Cin / Bump ("Due bicchieri che brindano") -->
+    <div id="bump-cheers-modal" class="bump-cheers-modal" aria-hidden="true">
+      <div class="cheers-card">
+        <div class="cheers-stage" id="cheers-stage">
+          <!-- Glass Left -->
+          <div class="cheers-glass-wrapper glass-wrap-left">
+            <svg class="cheers-glass-svg" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="beerGradL" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#fed330"/>
+                  <stop offset="60%" stop-color="#f39c12"/>
+                  <stop offset="100%" stop-color="#d35400"/>
+                </linearGradient>
+              </defs>
+              <ellipse cx="60" cy="165" rx="30" ry="7" fill="#dfe6e9" opacity="0.9"/>
+              <path d="M 55 118 L 55 160 L 65 160 L 65 118 Z" fill="#b2bec3" opacity="0.8"/>
+              <path d="M 28 25 C 22 75 42 118 60 118 C 78 118 98 75 92 25 Z" fill="rgba(255,255,255,0.32)" stroke="#b2bec3" stroke-width="2.5"/>
+              <path d="M 31 52 C 28 85 45 114 60 114 C 75 114 92 85 89 52 Z" fill="url(#beerGradL)"/>
+              <circle cx="50" cy="95" r="2.5" fill="#fff" opacity="0.7"/>
+              <circle cx="68" cy="82" r="2" fill="#fff" opacity="0.7"/>
+              <circle cx="44" cy="70" r="3" fill="#fff" opacity="0.7"/>
+              <circle cx="72" cy="62" r="2.5" fill="#fff" opacity="0.8"/>
+              <circle cx="58" cy="58" r="2" fill="#fff" opacity="0.8"/>
+              <ellipse cx="60" cy="50" rx="30" ry="8" fill="#ffffff"/>
+              <circle cx="42" cy="46" r="7" fill="#ffffff"/>
+              <circle cx="58" cy="43" r="8.5" fill="#ffffff"/>
+              <circle cx="74" cy="46" r="7" fill="#ffffff"/>
+              <path d="M 36 35 C 32 68 45 98 52 106" stroke="rgba(255,255,255,0.85)" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <ellipse cx="80" cy="35" rx="3" ry="8" fill="rgba(255,255,255,0.6)"/>
+            </svg>
+          </div>
+          <!-- Golden Sparks / Particles Container -->
+          <div class="cheers-sparks-container" id="cheers-sparks">
+            <span class="spark s1"></span>
+            <span class="spark s2"></span>
+            <span class="spark s3"></span>
+            <span class="spark s4"></span>
+            <span class="spark s5"></span>
+            <span class="spark s6"></span>
+            <span class="spark s7"></span>
+            <span class="spark s8"></span>
+            <span class="spark s9"></span>
+            <span class="spark s10"></span>
+            <span class="spark s11"></span>
+            <span class="spark s12"></span>
+          </div>
+          <!-- Glass Right -->
+          <div class="cheers-glass-wrapper glass-wrap-right">
+            <svg class="cheers-glass-svg" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="beerGradR" x1="100%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#fed330"/>
+                  <stop offset="60%" stop-color="#f39c12"/>
+                  <stop offset="100%" stop-color="#d35400"/>
+                </linearGradient>
+              </defs>
+              <ellipse cx="60" cy="165" rx="30" ry="7" fill="#dfe6e9" opacity="0.9"/>
+              <path d="M 55 118 L 55 160 L 65 160 L 65 118 Z" fill="#b2bec3" opacity="0.8"/>
+              <path d="M 28 25 C 22 75 42 118 60 118 C 78 118 98 75 92 25 Z" fill="rgba(255,255,255,0.32)" stroke="#b2bec3" stroke-width="2.5"/>
+              <path d="M 31 52 C 28 85 45 114 60 114 C 75 114 92 85 89 52 Z" fill="url(#beerGradR)"/>
+              <circle cx="70" cy="95" r="2.5" fill="#fff" opacity="0.7"/>
+              <circle cx="52" cy="82" r="2" fill="#fff" opacity="0.7"/>
+              <circle cx="76" cy="70" r="3" fill="#fff" opacity="0.7"/>
+              <circle cx="48" cy="62" r="2.5" fill="#fff" opacity="0.8"/>
+              <circle cx="62" cy="58" r="2" fill="#fff" opacity="0.8"/>
+              <ellipse cx="60" cy="50" rx="30" ry="8" fill="#ffffff"/>
+              <circle cx="78" cy="46" r="7" fill="#ffffff"/>
+              <circle cx="62" cy="43" r="8.5" fill="#ffffff"/>
+              <circle cx="46" cy="46" r="7" fill="#ffffff"/>
+              <path d="M 84 35 C 88 68 75 98 68 106" stroke="rgba(255,255,255,0.85)" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <ellipse cx="40" cy="35" rx="3" ry="8" fill="rgba(255,255,255,0.6)"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cheers-text-box">
+          <div class="cheers-badge-pill">CIN-CIN! 🥂</div>
+          <h2 class="cheers-title">Brindisi Trovato!</h2>
+          <p class="cheers-subtitle">+1 Drink aggiunto all'Ubriacometro</p>
         </div>
       </div>
     </div>
@@ -1851,6 +2224,30 @@
             gain.connect(ctx.destination);
             osc.start(start);
             osc.stop(start + 0.3);
+          });
+        } catch (e) {}
+      }
+
+      function playCheersClinkSound() {
+        if (isAudioMuted) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        try {
+          const now = ctx.currentTime;
+          // Crystal high-resonant glass bell clink (triad: 2250Hz, 3920Hz, 5874Hz)
+          [2250, 3920, 5874].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.985, now + 0.85);
+            const initialVol = idx === 0 ? 0.30 : (idx === 1 ? 0.16 : 0.08);
+            gain.gain.setValueAtTime(initialVol, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.75 + idx * 0.1);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.85 + idx * 0.1);
           });
         } catch (e) {}
       }
@@ -2825,6 +3222,7 @@
       function handleMainAction() {
         if (mainBtn.disabled) return;
         getAudioContext();
+        requestMotionPermission();
         if (appState === "TRACKING" && currentCandidates && currentCandidates.length > 0) {
           selectNextPlace();
         } else {
@@ -2886,6 +3284,8 @@
       if (drunkMinusBtn) drunkMinusBtn.addEventListener("click", removeDrink);
       if (drunkResetBtn) drunkResetBtn.addEventListener("click", resetDrinks);
       if (drunkToggleFxBtn) drunkToggleFxBtn.addEventListener("click", toggleDrunkEffects);
+      const btnTestCheers = document.getElementById("btn-test-cheers");
+      if (btnTestCheers) btnTestCheers.addEventListener("click", () => triggerCheersAnimation());
 
       updateSoundBtnUI();
       updateDrunkUI();
@@ -2906,6 +3306,12 @@
         if (typeof DeviceOrientationEvent.requestPermission === "function") {
           try {
             await DeviceOrientationEvent.requestPermission();
+          } catch (e) {}
+        }
+        if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+          try {
+            await DeviceMotionEvent.requestPermission();
+            initDeviceMotionListener();
           } catch (e) {}
         }
 
@@ -3787,6 +4193,224 @@
         errorBox.style.display = "none";
         resetUI();
       }
+
+      // =========================================================================
+      // --- BUMP / CIN-CIN TRA DUE SMARTPHONE VICINI (FIREBASE REALTIME DB) ---
+      // =========================================================================
+
+      const firebaseConfig = {
+        apiKey: "AIzaSy_INSERISCI_QUI_LA_TUA_API_KEY",
+        authDomain: "drink-compass-bump.firebaseapp.com",
+        databaseURL: "https://drink-compass-bump-default-rtdb.firebaseio.com",
+        projectId: "drink-compass-bump",
+        storageBucket: "drink-compass-bump.appspot.com",
+        messagingSenderId: "1234567890",
+        appId: "1:1234567890:web:abcdef1234567890"
+      };
+
+      let firebaseApp = null;
+      let firebaseDb = null;
+      let activeBumpsRef = null;
+      const myClientId = "bump_" + Math.random().toString(36).substring(2, 10) + "_" + Date.now();
+      let lastShakeTimestamp = 0;
+      const SHAKE_THRESHOLD = 20;
+      const SHAKE_COOLDOWN = 3000;
+      let lastMotionTotal = 0;
+      let isMotionListening = false;
+      let cheersCloseTimer = null;
+
+      function initFirebaseBump() {
+        try {
+          if (typeof firebase !== "undefined" && firebase.initializeApp) {
+            const isPlaceholder = !firebaseConfig.apiKey || firebaseConfig.apiKey.includes("INSERISCI");
+            if (isPlaceholder) {
+              console.info("Firebase Realtime DB: placeholder configurato. Per il matching multi-telefono inserisci le credenziali del tuo database Firebase in firebaseConfig.");
+            }
+            firebaseApp = firebase.apps && firebase.apps.length ? firebase.apps[0] : firebase.initializeApp(firebaseConfig);
+            firebaseDb = firebase.database();
+            activeBumpsRef = firebaseDb.ref("active_bumps");
+
+            // Listener in tempo reale per convalidare i bump di altri client
+            activeBumpsRef.on("child_added", (snapshot) => {
+              const bump = snapshot.val();
+              if (!bump || !bump.id || bump.id === myClientId) return;
+
+              const now = Date.now();
+              const timeDelta = Math.abs(now - (bump.t || 0));
+
+              // Spec 1: |Date.now() - bump.t| <= 600 ms
+              if (timeDelta > 600) return;
+
+              // Spec 2: Distanza <= 25 metri con formula Haversine
+              if (!userCoords || isNaN(userCoords.lat) || isNaN(userCoords.lon)) return;
+              if (typeof bump.lat !== "number" || typeof bump.lon !== "number") return;
+
+              const dist = getDist(userCoords.lat, userCoords.lon, bump.lat, bump.lon);
+              if (dist <= 25) {
+                // Il primo client che convalida il match rimuove il record dal database
+                snapshot.ref.remove().catch(() => {});
+                triggerCheersAnimation();
+              }
+            });
+          }
+        } catch (e) {
+          console.warn("Inizializzazione Firebase Bump:", e.message);
+        }
+      }
+
+      function publishBumpEvent() {
+        const now = Date.now();
+        if (now - lastShakeTimestamp < SHAKE_COOLDOWN) return;
+        lastShakeTimestamp = now;
+
+        // Feedback aptico leggero immediato sullo shake
+        if (navigator.vibrate) navigator.vibrate(30);
+
+        const lat = (userCoords && typeof userCoords.lat === "number") ? userCoords.lat : 0;
+        const lon = (userCoords && typeof userCoords.lon === "number") ? userCoords.lon : 0;
+
+        if (activeBumpsRef) {
+          try {
+            const newBumpRef = activeBumpsRef.push();
+            newBumpRef.set({
+              id: myClientId,
+              lat: lat,
+              lon: lon,
+              t: Date.now()
+            });
+            // Auto-rimozione su disconnessione
+            newBumpRef.onDisconnect().remove();
+
+            // Timeout locale a 2 secondi per non intasare il database
+            setTimeout(() => {
+              newBumpRef.remove().catch(() => {});
+            }, 2000);
+          } catch (err) {
+            console.warn("Errore pubblicazione bump su Firebase:", err);
+          }
+        } else {
+          // Se Firebase è offline o con placeholder, mostra la demo locale del Cin-Cin
+          triggerCheersAnimation();
+        }
+      }
+
+      function handleDeviceMotion(e) {
+        const now = Date.now();
+        if (now - lastShakeTimestamp < SHAKE_COOLDOWN) return;
+
+        let ax = 0, ay = 0, az = 0;
+        if (e.acceleration && (e.acceleration.x !== null || e.acceleration.y !== null)) {
+          ax = e.acceleration.x || 0;
+          ay = e.acceleration.y || 0;
+          az = e.acceleration.z || 0;
+          const mag = Math.sqrt(ax * ax + ay * ay + az * az);
+          if (mag >= SHAKE_THRESHOLD) {
+            publishBumpEvent();
+          }
+        } else if (e.accelerationIncludingGravity) {
+          const gx = e.accelerationIncludingGravity.x || 0;
+          const gy = e.accelerationIncludingGravity.y || 0;
+          const gz = e.accelerationIncludingGravity.z || 0;
+          const total = Math.sqrt(gx * gx + gy * gy + gz * gz);
+          const delta = Math.abs(total - (lastMotionTotal || 9.8));
+          lastMotionTotal = total;
+          if (delta >= SHAKE_THRESHOLD * 0.8) {
+            publishBumpEvent();
+          }
+        }
+      }
+
+      function initDeviceMotionListener() {
+        if (isMotionListening) return;
+        if (window.DeviceMotionEvent) {
+          window.addEventListener("devicemotion", handleDeviceMotion, true);
+          isMotionListening = true;
+          const banner = document.getElementById("motion-perm-banner");
+          if (banner) banner.classList.add("hidden");
+          try {
+            sessionStorage.setItem("alcol_motion_granted", "true");
+          } catch (e) {}
+        }
+      }
+
+      function requestMotionPermission() {
+        if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+          DeviceMotionEvent.requestPermission()
+            .then((res) => {
+              if (res === "granted") {
+                initDeviceMotionListener();
+              }
+            })
+            .catch(() => {});
+        } else {
+          initDeviceMotionListener();
+        }
+      }
+
+      function triggerCheersAnimation() {
+        const modal = document.getElementById("bump-cheers-modal");
+        if (!modal) return;
+
+        // Reset animazioni
+        modal.classList.remove("open", "closing", "impact-active");
+        void modal.offsetWidth; // forza reflow
+        modal.classList.add("open");
+
+        // Al momento dello scontro (380ms: calici inclinati al centro)
+        setTimeout(() => {
+          modal.classList.add("impact-active");
+          triggerBumpShake(); // applica classe bump-shake-active per impatto fisico
+          playCheersClinkSound(); // suono cristallino "clink" via getAudioContext()
+          if (navigator.vibrate) navigator.vibrate([60, 40, 100]); // aptico
+          addDrink(); // incrementa ubriacometro e versa birra
+        }, 380);
+
+        // Mostra per 2.5 secondi e poi chiudi con dissolvenza fluida
+        if (cheersCloseTimer) clearTimeout(cheersCloseTimer);
+        cheersCloseTimer = setTimeout(() => {
+          modal.classList.add("closing");
+          setTimeout(() => {
+            modal.classList.remove("open", "closing", "impact-active");
+          }, 400);
+        }, 2500);
+      }
+
+      // Esponi per test e debug manuale
+      window.triggerCheersAnimation = triggerCheersAnimation;
+      window.testBumpCinCin = triggerCheersAnimation;
+
+      // Inizializzazione motion banner e permessi su iOS / Streamlit
+      window.addEventListener("DOMContentLoaded", () => {
+        initFirebaseBump();
+
+        const banner = document.getElementById("motion-perm-banner");
+        const btnGrant = document.getElementById("btn-grant-motion");
+
+        if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+          let alreadyGranted = false;
+          try {
+            alreadyGranted = sessionStorage.getItem("alcol_motion_granted") === "true";
+          } catch (e) {}
+
+          if (!alreadyGranted && banner) {
+            banner.style.display = "flex";
+            if (btnGrant) {
+              btnGrant.addEventListener("click", (e) => {
+                e.stopPropagation();
+                requestMotionPermission();
+              });
+            }
+            banner.addEventListener("click", () => requestMotionPermission());
+          } else {
+            initDeviceMotionListener();
+          }
+        } else {
+          initDeviceMotionListener();
+        }
+      });
+
+      // Ascolta primo tocco per registrare i sensori su Safari/WebKit
+      window.addEventListener("pointerdown", () => requestMotionPermission(), { once: true });
     </script>
   </body>
 </html>
