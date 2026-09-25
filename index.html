@@ -897,10 +897,9 @@
         pointer-events: none;
       }
 
-      /* Rende l'immagine fantasma della bottiglia leggermente più compatta (es. 85%) */
       .drunk-ghost-compass img {
         transform-origin: center center;
-        scale: 0.15; /* Se vuoi ridurla ancora, prova 0.80 */
+        scale: 0.15;
       }
 
       .drunk-diplopia-ghost.diplopia-active {
@@ -996,12 +995,10 @@
         text-shadow: -0.9px 0 rgba(224, 124, 106, 0.5), 0.9px 0 rgba(108, 92, 231, 0.4);
       }
       body.drunk-lvl-3 .distance-card {
-        box-shadow: 0 10px 32px rgba(255, 71, 87, 0.3), 0 0 18px rgba(46, 213, 115, 0.22) !important;
-        animation: rainbowHueRotate 5s linear infinite;
+        box-shadow: 0 10px 28px rgba(224, 124, 106, 0.24) !important;
       }
       body.drunk-lvl-3 .spin-hub {
-        box-shadow: 0 0 24px rgba(224, 124, 106, 0.45), 0 0 12px rgba(108, 92, 231, 0.35);
-        animation: rainbowHueRotate 5s linear infinite;
+        box-shadow: 0 0 20px rgba(224, 124, 106, 0.35);
       }
 
       /* Drunk Level 4 (7+ drinks - capped) */
@@ -1014,23 +1011,11 @@
       body.drunk-lvl-4 #app-label {
         text-shadow: -1.2px 0 rgba(224, 124, 106, 0.55), 1.2px 0 rgba(9, 132, 227, 0.45);
       }
-      body.drunk-lvl-4 .rainbow-glow-ring {
-        opacity: 0.94;
-        box-shadow:
-          inset 0 0 65px rgba(255, 71, 87, 0.7),
-          inset 0 0 42px rgba(255, 159, 26, 0.65),
-          inset 0 0 26px rgba(46, 213, 115, 0.6),
-          inset 0 0 16px rgba(112, 161, 255, 0.65),
-          inset 0 0 8px rgba(155, 89, 182, 0.7);
-        animation: rainbowHueRotate 3.5s linear infinite, rainbowRingPulse 2.5s ease-in-out infinite;
-      }
       body.drunk-lvl-4 .distance-card {
-        box-shadow: 0 12px 38px rgba(255, 71, 87, 0.38), 0 0 20px rgba(255, 165, 2, 0.3), 0 0 14px rgba(30, 144, 255, 0.3) !important;
-        animation: rainbowHueRotate 3.5s linear infinite;
+        box-shadow: 0 12px 32px rgba(224, 124, 106, 0.30) !important;
       }
       body.drunk-lvl-4 .spin-hub {
-        box-shadow: 0 0 30px rgba(255, 71, 87, 0.5), 0 0 16px rgba(108, 92, 231, 0.4);
-        animation: rainbowHueRotate 3.5s linear infinite;
+        box-shadow: 0 0 24px rgba(224, 124, 106, 0.40);
       }
 
       /* Modal Ubriacometro Bump Style */
@@ -2353,6 +2338,7 @@
       function closeDrunkModal() {
         if (drunkModal) drunkModal.classList.remove("open");
         if (drunkEffectsEnabled && drinkCount > 0) {
+          triggerBeerPour(drinkCount);
           triggerDiplopia();
         }
       }
@@ -2364,8 +2350,6 @@
         triggerBumpShake();
         if (navigator.vibrate) navigator.vibrate(35);
         updateDrunkUI();
-        triggerBeerPour(drinkCount);
-        triggerDiplopia();
       }
 
       function removeDrink() {
@@ -2374,8 +2358,6 @@
           localStorage.setItem("alcol_drink_count", drinkCount);
           if (navigator.vibrate) navigator.vibrate(15);
           updateDrunkUI();
-          triggerBeerPour(drinkCount);
-          // RIMOSSO triggerDiplopia() da qui!
         }
       }
 
@@ -2397,9 +2379,6 @@
         if (!drunkEffectsEnabled) {
           drainBeerImmediate();
           clearDiplopia();
-        } else if (drinkCount > 0) {
-          triggerBeerPour(drinkCount);
-          // RIMOSSO triggerDiplopia() da qui!
         }
       }
 
