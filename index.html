@@ -347,6 +347,419 @@
         to { opacity: 1; transform: translateY(0); }
       }
 
+      /* --- FLOATING UTILITIES (Sound & Party Mode) --- */
+      .top-float-btn {
+        position: absolute;
+        top: max(16px, env(safe-area-inset-top, 16px));
+        z-index: 110;
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 999px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        color: var(--text-main);
+        cursor: pointer;
+        transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+      }
+      .top-float-btn:active {
+        transform: scale(0.92);
+      }
+      .top-float-left {
+        left: 16px;
+        width: 38px;
+        min-width: 38px;
+      }
+      .top-float-left.muted {
+        color: var(--text-dim);
+        opacity: 0.65;
+      }
+      .top-float-right {
+        right: 16px;
+        padding: 0 12px 0 10px;
+        gap: 6px;
+        color: var(--accent);
+        font-weight: 800;
+        font-size: 0.72rem;
+      }
+      .party-btn-badge {
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      /* Discard / Blacklist Button */
+      .discard-btn {
+        background: #fde8e8;
+        color: #b91c1c;
+        border: none;
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+      .discard-btn.visible {
+        display: inline-flex;
+      }
+      .discard-btn:active {
+        transform: scale(0.9);
+      }
+
+      /* Category Selector Chip */
+      .category-selector-wrapper {
+        margin-top: 6px;
+        display: flex;
+        justify-content: center;
+      }
+      .category-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-main);
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+      }
+      .category-chip:active {
+        transform: scale(0.95);
+        background: #f7f5f4;
+      }
+      .category-chip i {
+        color: var(--text-dim);
+      }
+
+      /* Custom Modals (Category & Party) */
+      .custom-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(6px);
+        z-index: 3000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+      .custom-modal-backdrop.open {
+        display: flex;
+        opacity: 1;
+      }
+      .category-modal-card {
+        background: white;
+        width: 100%;
+        max-width: 320px;
+        border-radius: 24px;
+        padding: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes modalSlideUp {
+        from { opacity: 0; transform: translateY(20px) scale(0.96); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+      .modal-header h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--text-main);
+      }
+      .modal-close-btn {
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        cursor: pointer;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: color 0.2s ease, background 0.2s ease;
+      }
+      .modal-close-btn:hover {
+        color: var(--text-main);
+        background: #f1f2f6;
+      }
+      .category-options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .category-option-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 16px;
+        border: 1.5px solid transparent;
+        background: #f8f9fa;
+        cursor: pointer;
+        text-align: left;
+        transition: all 0.2s ease;
+      }
+      .category-option-btn:hover {
+        background: #f1f2f6;
+      }
+      .category-option-btn.active {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+      }
+      .cat-opt-icon {
+        font-size: 1.3rem;
+      }
+      .cat-opt-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .cat-opt-title {
+        font-size: 0.85rem;
+        font-weight: 800;
+        color: var(--text-main);
+      }
+      .category-option-btn.active .cat-opt-title {
+        color: var(--accent);
+      }
+      .cat-opt-desc {
+        font-size: 0.68rem;
+        color: var(--text-dim);
+        margin-top: 1px;
+      }
+      .cat-check-icon {
+        color: var(--accent);
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.2s ease;
+      }
+      .category-option-btn.active .cat-check-icon {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      /* Party Roulette Modal */
+      .party-modal-card {
+        background: white;
+        width: 100%;
+        max-width: 360px;
+        border-radius: 28px;
+        padding: 22px 20px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+        max-height: 92vh;
+        overflow-y: auto;
+        animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .modal-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .party-icon-bubble {
+        font-size: 1.6rem;
+      }
+      .modal-title-wrap h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 800;
+      }
+      .modal-title-wrap p {
+        margin: 2px 0 0 0;
+        font-size: 0.72rem;
+        color: var(--text-dim);
+      }
+      .party-friends-section {
+        margin-bottom: 12px;
+      }
+      .party-input-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .party-input-row input {
+        flex: 1;
+        padding: 8px 14px;
+        border-radius: 14px;
+        border: 1.5px solid #e2e8f0;
+        font-size: 0.82rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .party-input-row input:focus {
+        border-color: var(--accent);
+      }
+      .party-add-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.15s ease;
+      }
+      .party-add-btn:active {
+        transform: scale(0.92);
+      }
+      .party-chips-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        max-height: 68px;
+        overflow-y: auto;
+      }
+      .party-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f1f5f9;
+        color: var(--text-main);
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 999px;
+      }
+      .party-chip-del {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 0.9rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+      }
+      .party-chip-del:hover {
+        color: #ef4444;
+      }
+      .party-wheel-container {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 8px 0;
+      }
+      #party-wheel-canvas {
+        border-radius: 50%;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+        background: #fff;
+      }
+      .party-wheel-pointer-pin {
+        position: absolute;
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-top: 22px solid #ef4444;
+        z-index: 10;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+      }
+      .party-winner-card {
+        display: none;
+        background: #fef3c7;
+        border: 1.5px solid #fde68a;
+        border-radius: 16px;
+        padding: 12px;
+        text-align: center;
+        margin: 8px 0;
+        animation: fadeIn 0.3s ease;
+      }
+      .party-winner-card.visible {
+        display: block;
+      }
+      .party-winner-badge {
+        font-size: 0.65rem;
+        font-weight: 800;
+        color: #b45309;
+        letter-spacing: 1px;
+      }
+      .party-winner-highlight {
+        font-size: 1.35rem;
+        font-weight: 900;
+        color: #92400e;
+        margin: 4px 0;
+      }
+      .party-winner-cheer {
+        margin: 0;
+        font-size: 0.75rem;
+        color: #78350f;
+        font-weight: 600;
+      }
+      .party-actions-row {
+        margin-top: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .party-spin-action-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 16px;
+        font-weight: 800;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(224, 124, 106, 0.35);
+        transition: transform 0.15s ease, opacity 0.2s ease;
+      }
+      .party-spin-action-btn:active {
+        transform: scale(0.97);
+      }
+      .party-spin-action-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .party-done-action-btn {
+        background: #2d3436;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 14px;
+        font-weight: 800;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-align: center;
+        transition: transform 0.15s ease;
+      }
+      .party-done-action-btn:active {
+        transform: scale(0.97);
+      }
+
       #error-box {
         position: fixed;
         top: 50%;
@@ -453,6 +866,13 @@
     </div>
 
     <section id="section-stage">
+      <button id="btn-sound" class="top-float-btn top-float-left" type="button" aria-label="Attiva/Disattiva audio" title="Audio">
+        <i data-lucide="volume-2" id="icon-sound" width="18" height="18"></i>
+      </button>
+      <button id="btn-party" class="top-float-btn top-float-right" type="button" aria-label="Chi paga il primo giro?" title="Chi paga il primo giro?">
+        <i data-lucide="sparkles" width="16" height="16"></i>
+        <span class="party-btn-badge">Chi paga?</span>
+      </button>
       <header>
         <div id="app-label">Alcol Finder</div>
         <div class="venue-title-row">
@@ -460,9 +880,19 @@
           <button class="share-btn" id="btn-share" type="button" aria-label="Condividi locale" title="Condividi locale">
             <i data-lucide="share-2" width="16" height="16"></i>
           </button>
+          <button class="discard-btn" id="btn-discard" type="button" aria-label="Scarta locale per stasera" title="Scarta locale per stasera">
+            <i data-lucide="ban" width="16" height="16"></i>
+          </button>
         </div>
         <div id="opening-status" class="opening-status-box"></div>
         <p id="status">Scegli la modalità e lancia la bottiglia.</p>
+        <div class="category-selector-wrapper">
+          <button id="btn-category" class="category-chip" type="button" aria-label="Filtro categoria bevuta">
+            <span id="category-chip-icon">🍹</span>
+            <span id="category-chip-label">Tutti i locali</span>
+            <i data-lucide="chevron-down" width="12" height="12"></i>
+          </button>
+        </div>
       </header>
       <div class="compass-box" id="compass-box">
         <img
@@ -510,6 +940,108 @@
       <button class="retry-btn" onclick="closeError()">RIPROVA</button>
     </div>
 
+    <!-- Modal Categoria Bevuta -->
+    <div id="category-modal" class="custom-modal-backdrop">
+      <div class="category-modal-card">
+        <div class="modal-header">
+          <h3>Scegli cosa bere</h3>
+          <button class="modal-close-btn" id="btn-close-category" type="button" aria-label="Chiudi">
+            <i data-lucide="x" width="18" height="18"></i>
+          </button>
+        </div>
+        <div class="category-options-list">
+          <button class="category-option-btn active" data-cat="all" type="button">
+            <span class="cat-opt-icon">🍹</span>
+            <div class="cat-opt-info">
+              <span class="cat-opt-title">Tutti i locali</span>
+              <span class="cat-opt-desc">Pub, bar, enoteche, club</span>
+            </div>
+            <i data-lucide="check" class="cat-check-icon" width="16" height="16"></i>
+          </button>
+          <button class="category-option-btn" data-cat="pub" type="button">
+            <span class="cat-opt-icon">🍺</span>
+            <div class="cat-opt-info">
+              <span class="cat-opt-title">Birrerie & Pub</span>
+              <span class="cat-opt-desc">Birre alla spina, pub, biergarten</span>
+            </div>
+            <i data-lucide="check" class="cat-check-icon" width="16" height="16"></i>
+          </button>
+          <button class="category-option-btn" data-cat="cocktail" type="button">
+            <span class="cat-opt-icon">🍸</span>
+            <div class="cat-opt-info">
+              <span class="cat-opt-title">Cocktail & Bar</span>
+              <span class="cat-opt-desc">Cocktail bar, aperitivi, lounge</span>
+            </div>
+            <i data-lucide="check" class="cat-check-icon" width="16" height="16"></i>
+          </button>
+          <button class="category-option-btn" data-cat="wine" type="button">
+            <span class="cat-opt-icon">🍷</span>
+            <div class="cat-opt-info">
+              <span class="cat-opt-title">Vinerie & Enoteche</span>
+              <span class="cat-opt-desc">Vino, calici e sfiziosità</span>
+            </div>
+            <i data-lucide="check" class="cat-check-icon" width="16" height="16"></i>
+          </button>
+          <button class="category-option-btn" data-cat="club" type="button">
+            <span class="cat-opt-icon">🪩</span>
+            <div class="cat-opt-info">
+              <span class="cat-opt-title">Club & Serata</span>
+              <span class="cat-opt-desc">Discoteche, serate, musica</span>
+            </div>
+            <i data-lucide="check" class="cat-check-icon" width="16" height="16"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Chi Paga il Primo Giro -->
+    <div id="party-modal" class="custom-modal-backdrop">
+      <div class="party-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="party-icon-bubble">🍻</span>
+            <div>
+              <h3>Chi Paga il Giro?</h3>
+              <p>Fai girare la ruota tra gli amici!</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" id="btn-close-party" type="button" aria-label="Chiudi">
+            <i data-lucide="x" width="20" height="20"></i>
+          </button>
+        </div>
+
+        <div class="party-friends-section">
+          <form id="party-add-form" class="party-input-row" onsubmit="event.preventDefault(); addFriendFromInput();">
+            <input type="text" id="party-name-input" placeholder="Nome amico (es. Leo)" maxlength="16" autocomplete="off" />
+            <button type="submit" id="btn-add-friend" class="party-add-btn" aria-label="Aggiungi">
+              <i data-lucide="plus" width="18" height="18"></i>
+            </button>
+          </form>
+          <div id="party-chips-list" class="party-chips-container"></div>
+        </div>
+
+        <div class="party-wheel-container">
+          <div class="party-wheel-pointer-pin"></div>
+          <canvas id="party-wheel-canvas" width="280" height="280"></canvas>
+        </div>
+
+        <div id="party-winner-banner" class="party-winner-card">
+          <div class="party-winner-badge">IL PRIMO GIRO LO OFFRE:</div>
+          <div id="party-winner-name" class="party-winner-highlight">NOME</div>
+          <p class="party-winner-cheer">Salute a tutti! 🍻 Ora andiamo a bere!</p>
+        </div>
+
+        <div class="party-actions-row">
+          <button id="btn-spin-wheel" class="party-spin-action-btn" type="button">
+            <i data-lucide="sparkles" width="18" height="18"></i> GIRA LA RUOTA!
+          </button>
+          <button id="btn-party-done" class="party-done-action-btn" type="button" style="display:none;">
+            CERCA UN LOCALE ➔
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
       // --- STATO ---
       let currentMode = "NEAR",
@@ -543,6 +1075,10 @@
         SPRING_STIFF = 0.08,
         SPRING_SOFT = 0.02;
 
+      // Audio & Ticks Tracking in Physics Loop
+      let lastTickAngle = 0;
+      let lastTickTime = 0;
+
       const bottleImg = document.getElementById("bottle-img");
       const compassBox = document.getElementById("compass-box");
       const iconSpin = document.getElementById("icon-spin");
@@ -552,7 +1088,29 @@
       const radiusCard = document.getElementById("radius-card");
       const errorBox = document.getElementById("error-box");
       const shareBtn = document.getElementById("btn-share");
+      const discardBtn = document.getElementById("btn-discard");
       const mainBtn = document.getElementById("main-btn");
+
+      const soundBtn = document.getElementById("btn-sound");
+      const iconSound = document.getElementById("icon-sound");
+      const partyBtn = document.getElementById("btn-party");
+
+      const categoryChip = document.getElementById("btn-category");
+      const categoryChipIcon = document.getElementById("category-chip-icon");
+      const categoryChipLabel = document.getElementById("category-chip-label");
+      const categoryModal = document.getElementById("category-modal");
+      const closeCategoryBtn = document.getElementById("btn-close-category");
+      const categoryOptionBtns = document.querySelectorAll(".category-option-btn");
+
+      const partyModal = document.getElementById("party-modal");
+      const closePartyBtn = document.getElementById("btn-close-party");
+      const partyNameInput = document.getElementById("party-name-input");
+      const partyChipsList = document.getElementById("party-chips-list");
+      const partyWheelCanvas = document.getElementById("party-wheel-canvas");
+      const partyWinnerBanner = document.getElementById("party-winner-banner");
+      const partyWinnerName = document.getElementById("party-winner-name");
+      const spinWheelBtn = document.getElementById("btn-spin-wheel");
+      const partyDoneBtn = document.getElementById("btn-party-done");
 
       const calibOverlay = document.getElementById("calibration-overlay");
       const calibTitle = document.getElementById("calib-title");
@@ -561,8 +1119,445 @@
       );
       const calibManualBtn = document.getElementById("calib-manual-btn");
 
-      lucide.createIcons();
-      requestAnimationFrame(physicsLoop);
+      // --- NUOVI STATI (Audio, Filtri, Blacklist, Party) ---
+      let isAudioMuted = localStorage.getItem("alcol_muted") === "true";
+      let currentCategory = "all";
+      const sessionBlacklist = new Set();
+
+      // --- SOUND ENGINE (Web Audio API) ---
+      let audioCtx = null;
+      function getAudioContext() {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            audioCtx = new AudioContextClass();
+          }
+        }
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume().catch(() => {});
+        }
+        return audioCtx;
+      }
+
+      function updateSoundBtnUI() {
+        if (!soundBtn) return;
+        soundBtn.classList.toggle("muted", isAudioMuted);
+        if (iconSound) {
+          iconSound.setAttribute("data-lucide", isAudioMuted ? "volume-x" : "volume-2");
+          lucide.createIcons();
+        }
+      }
+
+      function toggleSound() {
+        isAudioMuted = !isAudioMuted;
+        localStorage.setItem("alcol_muted", isAudioMuted ? "true" : "false");
+        updateSoundBtnUI();
+        if (!isAudioMuted) {
+          playTickSound(1.2);
+        }
+      }
+
+      function playTickSound(pitchMultiplier = 1.0) {
+        if (isAudioMuted) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        try {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const now = ctx.currentTime;
+          
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(650 * pitchMultiplier, now);
+          osc.frequency.exponentialRampToValueAtTime(180 * pitchMultiplier, now + 0.03);
+          
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          
+          osc.start(now);
+          osc.stop(now + 0.035);
+        } catch (e) {}
+      }
+
+      function playWhooshSound() {
+        if (isAudioMuted) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        try {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const now = ctx.currentTime;
+          
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(260, now);
+          osc.frequency.exponentialRampToValueAtTime(70, now + 0.35);
+          
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.linearRampToValueAtTime(0.35, now + 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          
+          osc.start(now);
+          osc.stop(now + 0.36);
+        } catch (e) {}
+      }
+
+      function playSuccessChime() {
+        if (isAudioMuted) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        try {
+          const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const start = ctx.currentTime + i * 0.085;
+            
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, start);
+            
+            gain.gain.setValueAtTime(0.18, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.start(start);
+            osc.stop(start + 0.36);
+          });
+        } catch (e) {}
+      }
+
+      function playDiscardSound() {
+        if (isAudioMuted) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        try {
+          const notes = [420, 210];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const start = ctx.currentTime + i * 0.07;
+            
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(freq, start);
+            
+            gain.gain.setValueAtTime(0.12, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.12);
+            
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            osc.start(start);
+            osc.stop(start + 0.13);
+          });
+        } catch (e) {}
+      }
+
+      // --- FILTRO CATEGORIA ---
+      const categoryData = {
+        all: { icon: "🍹", label: "Tutti i locali" },
+        pub: { icon: "🍺", label: "Birrerie & Pub" },
+        cocktail: { icon: "🍸", label: "Cocktail & Bar" },
+        wine: { icon: "🍷", label: "Vinerie & Enoteche" },
+        club: { icon: "🪩", label: "Club & Serata" }
+      };
+
+      function openCategoryModal() {
+        if (categoryModal) categoryModal.classList.add("open");
+      }
+
+      function closeCategoryModal() {
+        if (categoryModal) categoryModal.classList.remove("open");
+      }
+
+      function selectCategory(cat) {
+        if (!categoryData[cat]) return;
+        currentCategory = cat;
+        if (categoryChipIcon) categoryChipIcon.innerText = categoryData[cat].icon;
+        if (categoryChipLabel) categoryChipLabel.innerText = categoryData[cat].label;
+        
+        categoryOptionBtns.forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.cat === cat);
+        });
+        
+        closeCategoryModal();
+
+        if (appState === "TRACKING" && currentCandidates && currentCandidates.length > 0) {
+          const currentValid = targetPlaceData && isCandidateValid(targetPlaceData);
+          if (!currentValid) {
+            selectNextPlace();
+          }
+        }
+      }
+
+      function matchesCategory(place, cat) {
+        if (!cat || cat === "all") return true;
+        const name = (place.name || (place.tags && place.tags.name) || "").toLowerCase();
+        const amenity = (place.amenity || (place.tags && place.tags.amenity) || "").toLowerCase();
+        const cuisine = ((place.tags && place.tags.cuisine) || "").toLowerCase();
+        const fullText = `${name} ${amenity} ${cuisine}`;
+
+        if (cat === "pub") {
+          return (
+            amenity === "pub" ||
+            amenity === "biergarten" ||
+            /pub|birr|brew|craft|spina|beer|ale|irish|tavern/i.test(fullText)
+          );
+        } else if (cat === "cocktail") {
+          return (
+            amenity === "bar" ||
+            amenity === "cafe" ||
+            /cocktail|lounge|mixolog|aperitiv|bistrot|bar|drink|spritz/i.test(fullText)
+          );
+        } else if (cat === "wine") {
+          return (
+            /enotec|vin[io]|wine|cantina|mescita|bottigli|calic|osteria/i.test(fullText)
+          );
+        } else if (cat === "club") {
+          return (
+            amenity === "nightclub" ||
+            /club|disco|dancing|night|musica|dance|serata/i.test(fullText)
+          );
+        }
+        return true;
+      }
+
+      function getPlaceUniqueId(place) {
+        if (!place) return "";
+        if (place.id) return String(place.id);
+        const name = (place.name || (place.tags && place.tags.name) || "").toLowerCase().trim();
+        const lat = Number(place.lat).toFixed(4);
+        const lon = Number(place.lon).toFixed(4);
+        return `${name}_${lat}_${lon}`;
+      }
+
+      function isCandidateValid(place) {
+        if (!place) return false;
+        const uid = getPlaceUniqueId(place);
+        if (sessionBlacklist.has(uid)) return false;
+        return matchesCategory(place, currentCategory);
+      }
+
+      // --- BLACKLIST TEMPORANEA (Scarta per stasera) ---
+      function discardCurrentPlace() {
+        if (!targetPlaceData) return;
+        const uid = getPlaceUniqueId(targetPlaceData);
+        sessionBlacklist.add(uid);
+        playDiscardSound();
+        if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+        selectNextPlace();
+      }
+
+      // --- PARTY WHEEL (Chi Paga il Primo Giro?) ---
+      let partyFriends = ["Io", "Amico 1", "Amico 2"];
+      try {
+        const savedFriends = localStorage.getItem("alcol_party_friends");
+        if (savedFriends) {
+          const parsed = JSON.parse(savedFriends);
+          if (Array.isArray(parsed) && parsed.length >= 2) {
+            partyFriends = parsed;
+          }
+        }
+      } catch (e) {}
+
+      let wheelAngle = 0;
+      let wheelVelocity = 0;
+      let isWheelSpinning = false;
+      let lastWheelTickIndex = -1;
+
+      const WHEEL_COLORS = [
+        "#FF5A5F", "#FFB400", "#00A699", "#FC642D",
+        "#8B5CF6", "#06B6D4", "#EC4899", "#10B981",
+        "#F59E0B", "#3B82F6", "#EF4444", "#6366F1"
+      ];
+
+      function openPartyModal() {
+        if (partyModal) {
+          partyModal.classList.add("open");
+          renderPartyChips();
+          drawPartyWheel();
+          if (partyWinnerBanner) partyWinnerBanner.classList.remove("visible");
+          if (partyDoneBtn) partyDoneBtn.style.display = "none";
+        }
+      }
+
+      function closePartyModal() {
+        if (partyModal) partyModal.classList.remove("open");
+      }
+
+      function savePartyFriends() {
+        try {
+          localStorage.setItem("alcol_party_friends", JSON.stringify(partyFriends));
+        } catch (e) {}
+      }
+
+      function renderPartyChips() {
+        if (!partyChipsList) return;
+        partyChipsList.innerHTML = "";
+        partyFriends.forEach((friend, idx) => {
+          const chip = document.createElement("div");
+          chip.className = "party-chip";
+          chip.innerHTML = `
+            <span>${escapeHtml(friend)}</span>
+            <button type="button" class="party-chip-del" onclick="removePartyFriend(${idx})" aria-label="Rimuovi">&times;</button>
+          `;
+          partyChipsList.appendChild(chip);
+        });
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function addFriendFromInput() {
+        if (!partyNameInput) return;
+        const name = partyNameInput.value.trim();
+        if (!name) return;
+        if (partyFriends.length >= 16) {
+          alert("Massimo 16 amici per la ruota!");
+          return;
+        }
+        partyFriends.push(name);
+        partyNameInput.value = "";
+        savePartyFriends();
+        renderPartyChips();
+        drawPartyWheel();
+      }
+
+      function removePartyFriend(idx) {
+        if (partyFriends.length <= 2) {
+          alert("Servono almeno 2 amici per girare la ruota!");
+          return;
+        }
+        partyFriends.splice(idx, 1);
+        savePartyFriends();
+        renderPartyChips();
+        drawPartyWheel();
+      }
+
+      window.addFriendFromInput = addFriendFromInput;
+      window.removePartyFriend = removePartyFriend;
+
+      function drawPartyWheel() {
+        if (!partyWheelCanvas) return;
+        const ctx = partyWheelCanvas.getContext("2d");
+        const width = partyWheelCanvas.width;
+        const height = partyWheelCanvas.height;
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radius = Math.min(centerX, centerY) - 8;
+        const numSlices = partyFriends.length;
+        const sliceAngle = (2 * Math.PI) / numSlices;
+
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(wheelAngle);
+
+        for (let i = 0; i < numSlices; i++) {
+          const startA = i * sliceAngle;
+          const endA = startA + sliceAngle;
+
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.arc(0, 0, radius, startA, endA);
+          ctx.closePath();
+          ctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length];
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "#ffffff";
+          ctx.stroke();
+
+          ctx.save();
+          ctx.rotate(startA + sliceAngle / 2);
+          ctx.textAlign = "right";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 13px 'Plus Jakarta Sans', system-ui, sans-serif";
+          ctx.shadowColor = "rgba(0,0,0,0.35)";
+          ctx.shadowBlur = 3;
+
+          let label = partyFriends[i];
+          if (label.length > 10) label = label.substring(0, 9) + "…";
+          ctx.fillText(label, radius - 16, 0);
+          ctx.restore();
+        }
+
+        ctx.beginPath();
+        ctx.arc(0, 0, 26, 0, 2 * Math.PI);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#f1f2f6";
+        ctx.stroke();
+
+        ctx.font = "18px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowBlur = 0;
+        ctx.fillText("🍻", 0, 1);
+
+        ctx.restore();
+      }
+
+      function spinPartyWheel() {
+        if (isWheelSpinning || partyFriends.length < 2) return;
+        isWheelSpinning = true;
+        if (spinWheelBtn) spinWheelBtn.disabled = true;
+        if (partyWinnerBanner) partyWinnerBanner.classList.remove("visible");
+        if (partyDoneBtn) partyDoneBtn.style.display = "none";
+
+        playWhooshSound();
+        if (navigator.vibrate) navigator.vibrate(30);
+
+        wheelVelocity = 0.35 + Math.random() * 0.25;
+        lastWheelTickIndex = -1;
+
+        function animateWheel() {
+          wheelAngle += wheelVelocity;
+          wheelVelocity *= 0.983;
+
+          const numSlices = partyFriends.length;
+          const sliceAngle = (2 * Math.PI) / numSlices;
+          const pointerAngle = (3 * Math.PI / 2 - (wheelAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+          const currentSlice = Math.floor(pointerAngle / sliceAngle) % numSlices;
+
+          if (currentSlice !== lastWheelTickIndex) {
+            lastWheelTickIndex = currentSlice;
+            playTickSound(1.1);
+            if (navigator.vibrate && wheelVelocity > 0.04) navigator.vibrate(6);
+          }
+
+          drawPartyWheel();
+
+          if (wheelVelocity > 0.002) {
+            requestAnimationFrame(animateWheel);
+          } else {
+            isWheelSpinning = false;
+            if (spinWheelBtn) spinWheelBtn.disabled = false;
+
+            const winnerIndex = currentSlice;
+            const winner = partyFriends[winnerIndex];
+
+            if (partyWinnerName) partyWinnerName.innerText = winner;
+            if (partyWinnerBanner) partyWinnerBanner.classList.add("visible");
+            if (partyDoneBtn) partyDoneBtn.style.display = "inline-block";
+
+            playSuccessChime();
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+          }
+        }
+
+        requestAnimationFrame(animateWheel);
+      }
 
       // --- SENSORI ---
       if (window.DeviceOrientationEvent && "ontouchstart" in window) {
@@ -602,6 +1597,7 @@
 
       function handleMainAction() {
         if (mainBtn.disabled) return;
+        getAudioContext();
         if (appState === "TRACKING" && currentCandidates && currentCandidates.length > 0) {
           selectNextPlace();
         } else {
@@ -616,13 +1612,45 @@
       shareBtn.addEventListener("click", () => {
         if (!targetPlaceData) return;
         const name = (targetPlaceData.tags && targetPlaceData.tags.name) || targetPlaceData.name || "Locale misterioso";
-        
-        // LINK GOOGLE MAPS CORRETTO PER LA CONDIVISIONE
         const mapUrl = `https://www.google.com/maps/search/?api=1&query=${targetPlaceData.lat},${targetPlaceData.lon}`;
-        
         const msg = `La bottiglia ha parlato! Andiamo qui: ${name} 🍻 ${mapUrl}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
       });
+
+      if (discardBtn) discardBtn.addEventListener("click", discardCurrentPlace);
+      if (soundBtn) soundBtn.addEventListener("click", toggleSound);
+      if (partyBtn) partyBtn.addEventListener("click", openPartyModal);
+      if (closePartyBtn) closePartyBtn.addEventListener("click", closePartyModal);
+      if (partyModal) {
+        partyModal.addEventListener("click", (e) => {
+          if (e.target === partyModal) closePartyModal();
+        });
+      }
+      if (spinWheelBtn) spinWheelBtn.addEventListener("click", spinPartyWheel);
+      if (partyDoneBtn) {
+        partyDoneBtn.addEventListener("click", () => {
+          closePartyModal();
+          handleMainAction();
+        });
+      }
+
+      if (categoryChip) categoryChip.addEventListener("click", openCategoryModal);
+      if (closeCategoryBtn) closeCategoryBtn.addEventListener("click", closeCategoryModal);
+      if (categoryModal) {
+        categoryModal.addEventListener("click", (e) => {
+          if (e.target === categoryModal) closeCategoryModal();
+        });
+      }
+      categoryOptionBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          selectCategory(btn.dataset.cat);
+        });
+      });
+
+      updateSoundBtnUI();
+      drawPartyWheel();
+      lucide.createIcons();
+      requestAnimationFrame(physicsLoop);
 
       // --- LOGICA DI FLUSSO ---
 
@@ -630,6 +1658,9 @@
         if (mainBtn.disabled) return;
         resetUI();
         mainBtn.disabled = true;
+
+        getAudioContext();
+        playWhooshSound();
 
         if (typeof DeviceOrientationEvent.requestPermission === "function") {
           try {
@@ -679,6 +1710,7 @@
         lucide.createIcons();
         calibTitle.innerText = "Calibrata!";
         calibManualBtn.classList.remove("visible");
+        playSuccessChime();
         if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
         setTimeout(() => {
           isCalibrating = false;
@@ -695,6 +1727,7 @@
         appState = "SEARCHING";
         iconSpin.classList.add("searching-anim");
         targetText.innerHTML = "Cerco locali...";
+        playWhooshSound();
         velocity = SPIN_SPEED;
         fetchPlaces();
       }
@@ -727,6 +1760,7 @@
         iconSpin.classList.remove("searching-anim");
         if (openingStatusEl) openingStatusEl.innerHTML = "";
         shareBtn.classList.remove("visible");
+        if (discardBtn) discardBtn.classList.remove("visible");
         compassBox.style.boxShadow = "0 10px 40px rgba(0, 0, 0, 0.04)";
         compassBox.style.borderColor = "white";
         mainBtn.disabled = false;
@@ -810,7 +1844,7 @@
         const maxLon = lon + dLon;
 
         // 1. Nominatim per tag OSM (identifica bar, pub, caffè, birrerie e locali indipendentemente dal nome)
-        const nomAmenities = ["bar", "pub", "cafe", "biergarten"];
+        const nomAmenities = ["bar", "pub", "cafe", "biergarten", "nightclub"];
         const nomPromises = nomAmenities.map(async (amenity) => {
           try {
             const url = `https://nominatim.openstreetmap.org/search?format=json&extratags=1&amenity=${encodeURIComponent(amenity)}&bounded=1&viewbox=${minLon.toFixed(5)},${maxLat.toFixed(5)},${maxLon.toFixed(5)},${minLat.toFixed(5)}&limit=50`;
@@ -830,7 +1864,7 @@
         });
 
         // 2. Photon per parole chiave e POI complementari
-        const photonQueries = ["bar", "pub", "birreria"];
+        const photonQueries = ["bar", "pub", "birreria", "discoteca"];
         const photonPromises = photonQueries.map(async (q) => {
           try {
             const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lat=${lat}&lon=${lon}&bbox=${minLon.toFixed(5)},${minLat.toFixed(5)},${maxLon.toFixed(5)},${maxLat.toFixed(5)}&limit=35`;
@@ -901,16 +1935,28 @@
       }
 
       async function finalizeSelection(places, radiusLimit) {
+        let validPlaces = places.filter(isCandidateValid);
+        if (validPlaces.length === 0) {
+          if (currentCategory !== "all") {
+            showError("Nessun locale per la categoria selezionata nel raggio.");
+          } else if (sessionBlacklist.size > 0) {
+            showError("Hai scartato tutti i locali vicini per stasera!");
+          } else {
+            showError("Nessun locale disponibile nel raggio.");
+          }
+          return;
+        }
+
         if (currentMode === "NEAR") {
-          currentCandidates = places;
+          currentCandidates = validPlaces;
           currentCandidateIndex = 0;
           let place = currentCandidates[0];
           normalizePlace(place);
           targetPlaceData = place;
           calculateRoute(place);
         } else {
-          let candidates = places.filter((p) => p.dist <= radiusLimit);
-          if (candidates.length === 0) candidates = [...places];
+          let candidates = validPlaces.filter((p) => p.dist <= radiusLimit);
+          if (candidates.length === 0) candidates = [...validPlaces];
           currentCandidates = candidates;
           currentCandidateIndex = Math.floor(Math.random() * candidates.length);
           let place = currentCandidates[currentCandidateIndex];
@@ -983,11 +2029,13 @@
           openingStatusEl.innerHTML = `<span class="opening-badge ${ohInfo.badgeClass}"><i data-lucide="${ohInfo.icon}" width="14" height="14"></i> ${ohInfo.message}</span>`;
         }
 
-        // --- HAPTIC SUCCESS ---
+        // --- AUDIO & HAPTIC SUCCESS ---
+        playSuccessChime();
         if (navigator.vibrate) navigator.vibrate([50, 50, 150]);
 
         targetCoords = { lat: place.lat, lon: place.lon };
         shareBtn.classList.add("visible");
+        if (discardBtn) discardBtn.classList.add("visible");
         lucide.createIcons();
 
         updateNavigation(userCoords);
@@ -1025,7 +2073,8 @@
           openingStatusEl.innerHTML = `<span class="opening-badge ${ohInfo.badgeClass}"><i data-lucide="${ohInfo.icon}" width="14" height="14"></i> ${ohInfo.message}</span>`;
         }
 
-        // --- HAPTIC SUCCESS ---
+        // --- AUDIO & HAPTIC SUCCESS ---
+        playSuccessChime();
         if (navigator.vibrate) navigator.vibrate([50, 50, 150]);
 
         routePath = [
@@ -1033,6 +2082,7 @@
           [place.lon, place.lat],
         ];
         shareBtn.classList.add("visible");
+        if (discardBtn) discardBtn.classList.add("visible");
         lucide.createIcons();
 
         appState = "TRACKING";
@@ -1208,25 +2258,40 @@
       }
 
       async function selectNextPlace() {
-        if (!currentCandidates || currentCandidates.length === 0) {
-          startFlow();
+        const pool = (cachedPlaces && cachedPlaces.length > 0) ? cachedPlaces : currentCandidates;
+        const validCandidates = (pool || []).filter(isCandidateValid);
+
+        if (validCandidates.length === 0) {
+          if (sessionBlacklist.size > 0 && currentCategory === "all") {
+            statusText.innerHTML = "Tutti i locali vicini sono stati scartati per stasera!";
+          } else if (currentCategory !== "all") {
+            statusText.innerHTML = "Nessun altro locale trovato per questa categoria!";
+          } else {
+            statusText.innerHTML = "Nessun altro locale trovato nelle vicinanze!";
+          }
+          if (discardBtn) discardBtn.classList.remove("visible");
+          if (shareBtn) shareBtn.classList.remove("visible");
           return;
         }
 
-        if (currentCandidates.length === 1) {
+        currentCandidates = validCandidates;
+
+        if (currentCandidates.length === 1 && targetPlaceData && getPlaceUniqueId(currentCandidates[0]) === getPlaceUniqueId(targetPlaceData)) {
           statusText.innerHTML =
-            "È l'unico locale trovato nelle vicinanze!<br>Segui la bottiglia!";
+            "È l'unico locale valido trovato nelle vicinanze!<br>Segui la bottiglia!";
           velocity = SPIN_SPEED * 0.6;
+          playWhooshSound();
           return;
         }
 
         mainBtn.disabled = true;
         iconSpin.classList.add("searching-anim");
-        // Effetto rotazione bottiglia
+        playWhooshSound();
         velocity = SPIN_SPEED;
         targetText.innerHTML = "Cerco un altro locale...";
         if (openingStatusEl) openingStatusEl.innerHTML = "";
         shareBtn.classList.remove("visible");
+        if (discardBtn) discardBtn.classList.remove("visible");
 
         if (currentMode === "NEAR") {
           currentCandidateIndex++;
@@ -1236,7 +2301,7 @@
         } else {
           let nextIdx = currentCandidateIndex;
           let attempts = 0;
-          while (nextIdx === currentCandidateIndex && attempts < 10) {
+          while (nextIdx === currentCandidateIndex && attempts < 10 && currentCandidates.length > 1) {
             nextIdx = Math.floor(Math.random() * currentCandidates.length);
             attempts++;
           }
@@ -1366,6 +2431,21 @@
         }
         angle += velocity * dt;
         bottleImg.style.transform = `rotate(${angle}deg)`;
+
+        // --- AUDIO & HAPTIC TICKS ---
+        const speed = Math.abs(velocity);
+        if (speed > 1.2) {
+          const degDiff = Math.abs(angle - lastTickAngle);
+          if (degDiff >= 36 && currentTime - lastTickTime > 40) {
+            lastTickAngle = angle;
+            lastTickTime = currentTime;
+            playTickSound(Math.min(1.4, 0.8 + speed * 0.02));
+            if (navigator.vibrate && speed < 12 && speed > 2) {
+              navigator.vibrate(5);
+            }
+          }
+        }
+
         requestAnimationFrame(physicsLoop);
       }
 
