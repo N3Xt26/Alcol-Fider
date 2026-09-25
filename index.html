@@ -2239,35 +2239,54 @@
         }
       }
 
-      // --- SIMULAZIONE LIQUIDO BIRRA (VIEWPORT BEER POUR & TILT) ---
+      // --- SIMULAZIONE LIQUIDO BIRRA PREMIUM (HYPER-REACTIVE TILT & 3D ARTISANAL BEER) ---
       const beerCanvas = document.getElementById("beer-canvas");
       const beerCtx = beerCanvas ? beerCanvas.getContext("2d") : null;
 
       let beerState = "IDLE"; // 'IDLE' | 'POURING' | 'SETTLED' | 'DRAINING'
-      let beerLevel = 0; // livello riempimento attuale (da 0.0 a 1.0)
-      let targetBeerLevel = 0; // livello riempimento target
-      let beerPourTimer = 0; // countdown in ms prima che inizi lo svuotamento
-      let beerDeviceRoll = 0; // gamma (inclinazione sinistra/destra -90 a 90)
-      let beerDevicePitch = 0; // beta (inclinazione fronte/retro -180 a 180)
-      let liquidTilt = 0; // angolo di oscillazione liquido corrente (radianti)
-      let liquidTiltVel = 0; // velocità angolare oscillazione (con inerzia e smorzamento)
-      let waveTime = 0; // tempo per le onde superficiali
-      let beerBubbles = []; // bollicine effervescenti
+      let beerLevel = 0; // Livello liquido (0.0 to 1.0)
+      let targetBeerLevel = 0; // Livello desiderato
+      let beerPourTimer = 0; // Timer prima dello svuotamento
+      let beerDeviceRoll = 0; // Roll inclinazione laterale (-90 a +90)
+      let prevDeviceRoll = 0;
+      let rollVelocity = 0; // Velocità di inclinazione (per slosh impulse)
+      let sloshImpulse = 0; // Impulso turbolenza da scuotimento
+      let liquidTilt = 0; // Inclinazione superficie (radianti)
+      let liquidTiltVel = 0; // Velocità angolare
+      let waveTime = 0;
+      let beerBubbles = []; // Bollicine perlage con highlight 3D
+      let beerCondensation = []; // Goccioline di condensa sul vetro
       let lastBeerTime = performance.now();
       let beerAnimationId = null;
 
-      function initBeerBubbles(count = 38) {
+      // Inizializzazione perlage (colonne di bollicine che salgono dai punti di nucleazione)
+      function initBeerBubbles(count = 46) {
         beerBubbles = [];
+        const nucleationPoints = [0.12, 0.28, 0.45, 0.62, 0.78, 0.90];
         for (let i = 0; i < count; i++) {
+          const nuc = nucleationPoints[i % nucleationPoints.length] + (Math.random() * 0.08 - 0.04);
           beerBubbles.push({
-            x: Math.random(),
+            nucX: Math.max(0.04, Math.min(0.96, nuc)),
             y: Math.random(),
-            radius: 1.0 + Math.random() * 2.2,
-            speed: 0.12 + Math.random() * 0.22,
-            swaySpeed: 1.5 + Math.random() * 2.5,
-            swayAmp: 2.0 + Math.random() * 4.0,
-            opacity: 0.35 + Math.random() * 0.45,
-            seed: Math.random() * 100,
+            radius: 0.9 + Math.random() * 2.4,
+            speed: 0.16 + Math.random() * 0.28,
+            swaySpeed: 1.8 + Math.random() * 3.2,
+            swayAmp: 1.8 + Math.random() * 3.6,
+            opacity: 0.45 + Math.random() * 0.45,
+            seed: Math.random() * 50,
+          });
+        }
+      }
+
+      // Inizializzazione goccioline di condensa sul vetro (effetto bicchiere ghiacciato)
+      function initBeerCondensation(count = 32) {
+        beerCondensation = [];
+        for (let i = 0; i < count; i++) {
+          beerCondensation.push({
+            x: 0.03 + Math.random() * 0.94,
+            y: 0.05 + Math.random() * 0.90,
+            r: 1.2 + Math.random() * 2.8,
+            opacity: 0.25 + Math.random() * 0.45,
           });
         }
       }
@@ -2286,27 +2305,45 @@
       }
 
       window.addEventListener("resize", resizeBeerCanvas, { passive: true });
-      window.addEventListener("orientationchange", () => setTimeout(resizeBeerCanvas, 200), { passive: true });
+      window.addEventListener("orientationchange", () => setTimeout(resizeBeerCanvas, 150), { passive: true });
       resizeBeerCanvas();
       initBeerBubbles();
+      initBeerCondensation();
 
-      // Rilevamento orientamento giroscopio/accelerometro per il liquido
+      // Rilevamento orientamento ad altissima reattività
       window.addEventListener(
         "deviceorientation",
         (e) => {
-          if (typeof e.gamma === "number") beerDeviceRoll = e.gamma;
-          if (typeof e.beta === "number") beerDevicePitch = e.beta;
+          if (typeof e.gamma === "number") {
+            const now = performance.now();
+            const dt = Math.max(0.008, (now - lastBeerTime) / 1000);
+            prevDeviceRoll = beerDeviceRoll;
+            beerDeviceRoll = e.gamma;
+            rollVelocity = (beerDeviceRoll - prevDeviceRoll) / dt;
+            sloshImpulse = Math.min(18, sloshImpulse + Math.abs(rollVelocity) * 0.012);
+          }
         },
         true,
       );
 
-      // Supporto e test anche da desktop muovendo il mouse orizzontalmente
+      // Supporto interattivo anche da desktop muovendo il mouse
+      let lastMouseX = null;
+      let lastMouseTime = performance.now();
       window.addEventListener(
         "mousemove",
         (e) => {
           if (!window.DeviceOrientationEvent || !("ontouchstart" in window)) {
+            const now = performance.now();
+            const dt = Math.max(0.01, (now - lastMouseTime) / 1000);
             const normX = (e.clientX / window.innerWidth) * 2 - 1;
-            beerDeviceRoll = normX * 24;
+            prevDeviceRoll = beerDeviceRoll;
+            beerDeviceRoll = normX * 48;
+            if (lastMouseX !== null) {
+              const mouseVel = (e.clientX - lastMouseX) / dt;
+              sloshImpulse = Math.min(18, sloshImpulse + Math.abs(mouseVel) * 0.008);
+            }
+            lastMouseX = e.clientX;
+            lastMouseTime = now;
           }
         },
         { passive: true },
@@ -2314,8 +2351,7 @@
 
       function getBeerTargetLevel(drinks) {
         if (!drunkEffectsEnabled || drinks <= 0) return 0;
-        // Livello di versamento proporzionale ai drink consumati
-        const levels = [0, 0.22, 0.38, 0.52, 0.65, 0.78, 0.88, 0.95];
+        const levels = [0, 0.24, 0.40, 0.55, 0.68, 0.80, 0.90, 0.96];
         return drinks < levels.length ? levels[drinks] : 0.96;
       }
 
@@ -2326,7 +2362,8 @@
         }
         targetBeerLevel = getBeerTargetLevel(drinks);
         beerState = "POURING";
-        beerPourTimer = 4000; // La birra resta visibile per circa 4 secondi prima di svuotarsi
+        sloshImpulse = Math.max(sloshImpulse, 14);
+        beerPourTimer = 4500;
         startBeerLoop();
       }
 
@@ -2344,17 +2381,17 @@
       }
 
       function renderBeerFrame(now) {
-        const dt = Math.min((now - lastBeerTime) / 1000, 0.1);
+        const dt = Math.min((now - lastBeerTime) / 1000, 0.08);
         lastBeerTime = now;
         waveTime += dt;
 
         const w = window.innerWidth;
         const h = window.innerHeight;
 
-        // Gestione stati del liquido (versamento, permanenza, svuotamento)
+        // Gestione stati del liquido
         if (beerState === "POURING") {
-          beerLevel += (targetBeerLevel - beerLevel) * Math.min(1, 3.8 * dt);
-          if (Math.abs(targetBeerLevel - beerLevel) < 0.015) {
+          beerLevel += (targetBeerLevel - beerLevel) * Math.min(1, 4.2 * dt);
+          if (Math.abs(targetBeerLevel - beerLevel) < 0.012) {
             beerLevel = targetBeerLevel;
             beerState = "SETTLED";
           }
@@ -2365,7 +2402,7 @@
             targetBeerLevel = 0;
           }
         } else if (beerState === "DRAINING") {
-          const drainSpeed = Math.max(0.08, beerLevel * 0.35);
+          const drainSpeed = Math.max(0.09, beerLevel * 0.36);
           beerLevel -= drainSpeed * dt;
           if (beerLevel <= 0.005) {
             beerLevel = 0;
@@ -2373,113 +2410,211 @@
           }
         }
 
-        // Se completamente vuoto, pulisci il canvas e ferma il loop per risparmiare risorse
+        // Se vuoto e a riposo, ferma il loop
         if (beerState === "IDLE" && beerLevel <= 0) {
           if (beerCtx) beerCtx.clearRect(0, 0, w, h);
           beerAnimationId = null;
           return;
         }
 
-        // Slosh Physics: inerzia e oscillazione basate sull'inclinazione del dispositivo
-        const targetTilt = -Math.max(-42, Math.min(42, beerDeviceRoll || 0)) * (Math.PI / 180);
+        // --- FISICA REATTIVA DI INCLINAZIONE & SLOSH (MOLTO PIÙ REATTIVA) ---
+        const maxTiltRad = 1.11; // ~64 gradi
+        const targetTilt = -Math.max(-maxTiltRad, Math.min(maxTiltRad, (beerDeviceRoll || 0) * (Math.PI / 180)));
         const tiltDiff = targetTilt - liquidTilt;
-        liquidTiltVel += tiltDiff * 14.0 * dt;
-        liquidTiltVel *= Math.pow(0.82, dt * 60); // smorzamento attrito fluido
+
+        liquidTiltVel += (tiltDiff * 28.0 + rollVelocity * 0.08) * dt;
+        liquidTiltVel *= Math.pow(0.79, dt * 60);
         liquidTilt += liquidTiltVel * dt;
+
+        sloshImpulse *= Math.pow(0.92, dt * 60);
 
         if (beerCtx) {
           beerCtx.clearRect(0, 0, w, h);
 
           const baseY = h * (1.0 - beerLevel);
-          const waveAmp = (beerState === "POURING" ? 10 : 5) * Math.min(1, beerLevel * 2);
+          const tanTilt = Math.tan(liquidTilt);
+          const baseWaveAmp = ((beerState === "POURING" ? 14 : 7) + sloshImpulse * 0.8) * Math.min(1, beerLevel * 2.2);
 
-          // Calcola il profilo ondulato e inclinato della superficie
-          const numPoints = 32;
+          const numPoints = 36;
           const stepX = w / numPoints;
-          const points = [];
+
+          const frontPoints = [];
+          const backPoints = [];
 
           for (let i = 0; i <= numPoints; i++) {
             const x = i * stepX;
-            const tiltOffset = (x - w / 2) * Math.tan(liquidTilt);
-            const wave1 = Math.sin(x * 0.018 + waveTime * 3.2) * waveAmp;
-            const wave2 = Math.cos(x * 0.038 - waveTime * 2.1) * (waveAmp * 0.45);
-            const y = Math.max(0, Math.min(h + 20, baseY + tiltOffset + wave1 + wave2));
-            points.push({ x, y });
+            const normX = (x - w / 2);
+            const tiltOffset = normX * tanTilt;
+            const wallClimb = Math.pow(Math.abs(normX) / (w / 2), 2) * (liquidTilt * (normX > 0 ? -12 : 12));
+
+            const fWave1 = Math.sin(x * 0.016 + waveTime * 3.6) * baseWaveAmp;
+            const fWave2 = Math.cos(x * 0.034 - waveTime * 2.4) * (baseWaveAmp * 0.45);
+            const frontY = Math.max(-30, Math.min(h + 30, baseY + tiltOffset + fWave1 + fWave2 + wallClimb));
+            frontPoints.push({ x, y: frontY });
+
+            const bWave1 = Math.sin(x * 0.016 + waveTime * 3.6 + 1.25) * (baseWaveAmp * 0.85);
+            const bWave2 = Math.cos(x * 0.034 - waveTime * 2.4 + 0.9) * (baseWaveAmp * 0.4);
+            const backY = Math.max(-30, Math.min(h + 30, baseY + tiltOffset - 10 + bWave1 + bWave2));
+            backPoints.push({ x, y: backY });
           }
 
           beerCtx.save();
 
-          // 1. Disegna il corpo dorato semi-trasparente della birra
+          // 1. ONDA POSTERIORE (3D DEPTH LAYER)
           beerCtx.beginPath();
           beerCtx.moveTo(0, h);
-          beerCtx.lineTo(points[0].x, points[0].y);
-          for (let i = 1; i < points.length; i++) {
-            const prev = points[i - 1];
-            const curr = points[i];
+          beerCtx.lineTo(backPoints[0].x, backPoints[0].y);
+          for (let i = 1; i < backPoints.length; i++) {
+            const prev = backPoints[i - 1];
+            const curr = backPoints[i];
             const midX = (prev.x + curr.x) / 2;
             const midY = (prev.y + curr.y) / 2;
             beerCtx.quadraticCurveTo(prev.x, prev.y, midX, midY);
           }
-          beerCtx.lineTo(w, points[points.length - 1].y);
+          beerCtx.lineTo(w, backPoints[backPoints.length - 1].y);
           beerCtx.lineTo(w, h);
           beerCtx.closePath();
 
-          const beerGrad = beerCtx.createLinearGradient(0, baseY - 50, 0, h);
-          // Opacità calibrata (30-42%) per garantire ottima leggibilità del testo sottostante
-          beerGrad.addColorStop(0, "rgba(255, 215, 65, 0.30)");
-          beerGrad.addColorStop(0.35, "rgba(242, 170, 25, 0.36)");
-          beerGrad.addColorStop(1, "rgba(215, 125, 10, 0.42)");
-          beerCtx.fillStyle = beerGrad;
+          const backBeerGrad = beerCtx.createLinearGradient(0, baseY - 40, 0, h);
+          backBeerGrad.addColorStop(0, "rgba(215, 120, 10, 0.22)");
+          backBeerGrad.addColorStop(1, "rgba(175, 75, 5, 0.35)");
+          beerCtx.fillStyle = backBeerGrad;
           beerCtx.fill();
 
-          // 2. Bollicine di effervescenza ascendenti
+          beerCtx.lineWidth = 4;
+          beerCtx.strokeStyle = "rgba(255, 245, 215, 0.40)";
+          beerCtx.stroke();
+
+          // 2. ONDA ANTERIORE (CORPO BIRRA AMBRATO CRISTALLINO)
+          beerCtx.beginPath();
+          beerCtx.moveTo(0, h);
+          beerCtx.lineTo(frontPoints[0].x, frontPoints[0].y);
+          for (let i = 1; i < frontPoints.length; i++) {
+            const prev = frontPoints[i - 1];
+            const curr = frontPoints[i];
+            const midX = (prev.x + curr.x) / 2;
+            const midY = (prev.y + curr.y) / 2;
+            beerCtx.quadraticCurveTo(prev.x, prev.y, midX, midY);
+          }
+          beerCtx.lineTo(w, frontPoints[frontPoints.length - 1].y);
+          beerCtx.lineTo(w, h);
+          beerCtx.closePath();
+
+          const frontBeerGrad = beerCtx.createLinearGradient(0, baseY - 60, 0, h);
+          frontBeerGrad.addColorStop(0, "rgba(255, 225, 75, 0.32)");
+          frontBeerGrad.addColorStop(0.3, "rgba(245, 175, 22, 0.36)");
+          frontBeerGrad.addColorStop(0.7, "rgba(228, 135, 12, 0.40)");
+          frontBeerGrad.addColorStop(1, "rgba(195, 95, 5, 0.45)");
+          beerCtx.fillStyle = frontBeerGrad;
+          beerCtx.fill();
+
+          // Lustro / riflesso caustico della luce interna
+          const causticX = w * (0.5 - liquidTilt * 0.35);
+          const causticGrad = beerCtx.createRadialGradient(causticX, baseY + 60, 10, causticX, baseY + 90, w * 0.65);
+          causticGrad.addColorStop(0, "rgba(255, 240, 150, 0.18)");
+          causticGrad.addColorStop(0.6, "rgba(255, 210, 80, 0.06)");
+          causticGrad.addColorStop(1, "rgba(255, 180, 20, 0)");
+          beerCtx.fillStyle = causticGrad;
+          beerCtx.fill();
+
+          // 3. PERLAGE EFFERVESCENTE 3D (BOLLICINE REALISTICHE)
           for (let b of beerBubbles) {
             b.y -= b.speed * dt;
             if (b.y < 0) b.y = 1.0;
-            const bx = (b.x * w + Math.sin(waveTime * b.swaySpeed + b.seed) * b.swayAmp) % w;
-            const by = baseY + (h - baseY) * b.y;
 
-            const surfY = baseY + (bx - w / 2) * Math.tan(liquidTilt);
-            if (by > surfY + 4 && by < h) {
+            const bx = (b.nucX * w + Math.sin(waveTime * b.swaySpeed + b.seed) * b.swayAmp);
+            const by = baseY + (h - baseY) * b.y;
+            const surfY = baseY + (bx - w / 2) * tanTilt;
+
+            if (by > surfY + 8 && by < h) {
               beerCtx.beginPath();
               beerCtx.arc(bx, by, b.radius, 0, Math.PI * 2);
-              beerCtx.fillStyle = `rgba(255, 250, 220, ${b.opacity})`;
+              beerCtx.fillStyle = `rgba(255, 242, 200, ${b.opacity * 0.7})`;
+              beerCtx.fill();
+
+              beerCtx.beginPath();
+              beerCtx.arc(bx - b.radius * 0.35, by - b.radius * 0.35, b.radius * 0.42, 0, Math.PI * 2);
+              beerCtx.fillStyle = `rgba(255, 255, 255, ${b.opacity * 0.95})`;
               beerCtx.fill();
             }
           }
 
-          // 3. Schiuma cremosa avorio in superficie
-          const foamThickness = 12 + Math.min(8, beerLevel * 8);
+          // 4. CORONA DI SCHIUMA CREMOSA ARTIGIANALE (FOAM HEAD)
+          const foamThickness = 14 + Math.min(10, beerLevel * 10) + (beerState === "POURING" ? 8 : 0);
+
           beerCtx.beginPath();
-          beerCtx.moveTo(points[0].x, points[0].y);
-          for (let i = 1; i < points.length; i++) {
-            const prev = points[i - 1];
-            const curr = points[i];
+          beerCtx.moveTo(frontPoints[0].x, frontPoints[0].y);
+          for (let i = 1; i < frontPoints.length; i++) {
+            const prev = frontPoints[i - 1];
+            const curr = frontPoints[i];
             const midX = (prev.x + curr.x) / 2;
             const midY = (prev.y + curr.y) / 2;
             beerCtx.quadraticCurveTo(prev.x, prev.y, midX, midY);
           }
-          for (let i = points.length - 1; i >= 0; i--) {
-            const pt = points[i];
+          for (let i = frontPoints.length - 1; i >= 0; i--) {
+            const pt = frontPoints[i];
             beerCtx.lineTo(pt.x, Math.min(h, pt.y + foamThickness));
           }
           beerCtx.closePath();
 
-          const foamGrad = beerCtx.createLinearGradient(0, baseY - 10, 0, baseY + foamThickness);
-          foamGrad.addColorStop(0, "rgba(255, 255, 245, 0.72)");
-          foamGrad.addColorStop(0.65, "rgba(255, 245, 215, 0.45)");
-          foamGrad.addColorStop(1, "rgba(255, 235, 175, 0.12)");
+          const foamGrad = beerCtx.createLinearGradient(0, baseY - 15, 0, baseY + foamThickness + 10);
+          foamGrad.addColorStop(0, "rgba(255, 255, 252, 0.88)");
+          foamGrad.addColorStop(0.35, "rgba(255, 250, 230, 0.72)");
+          foamGrad.addColorStop(0.75, "rgba(255, 240, 195, 0.42)");
+          foamGrad.addColorStop(1, "rgba(245, 220, 150, 0.08)");
           beerCtx.fillStyle = foamGrad;
           beerCtx.fill();
 
-          // Bollicine di schiuma lungo la cresta
-          for (let i = 0; i < points.length; i += 2) {
-            const pt = points[i];
-            const r = 2.5 + Math.sin(i * 1.7 + waveTime * 2) * 1.5;
+          beerCtx.beginPath();
+          beerCtx.moveTo(frontPoints[0].x, frontPoints[0].y);
+          for (let i = 1; i < frontPoints.length; i++) {
+            const prev = frontPoints[i - 1];
+            const curr = frontPoints[i];
+            const midX = (prev.x + curr.x) / 2;
+            const midY = (prev.y + curr.y) / 2;
+            beerCtx.quadraticCurveTo(prev.x, prev.y, midX, midY);
+          }
+          beerCtx.lineWidth = 2.5;
+          beerCtx.strokeStyle = "rgba(255, 255, 255, 0.92)";
+          beerCtx.stroke();
+
+          for (let i = 0; i < frontPoints.length; i += 2) {
+            const pt = frontPoints[i];
+            const r = 3.0 + Math.sin(i * 1.5 + waveTime * 2.5) * 1.8 + Math.cos(i * 0.8) * 1.2;
             beerCtx.beginPath();
-            beerCtx.arc(pt.x, pt.y - 1, Math.max(1, r), 0, Math.PI * 2);
-            beerCtx.fillStyle = "rgba(255, 255, 250, 0.75)";
+            beerCtx.arc(pt.x, pt.y - 1, Math.max(1.5, r), 0, Math.PI * 2);
+            beerCtx.fillStyle = "rgba(255, 255, 250, 0.88)";
             beerCtx.fill();
+
+            beerCtx.beginPath();
+            beerCtx.arc(pt.x, pt.y + r * 0.6, r * 0.7, 0, Math.PI * 2);
+            beerCtx.fillStyle = "rgba(240, 215, 160, 0.35)";
+            beerCtx.fill();
+          }
+
+          // 5. GOCCE DI CONDENSA SUL VETRO (FROSTED GLASS EFFECT)
+          if (beerLevel > 0.1) {
+            for (let c of beerCondensation) {
+              const cx = c.x * w;
+              const cy = c.y * h;
+              const localSurfY = baseY + (cx - w / 2) * tanTilt;
+              if (cy > localSurfY - 140 && cy < h - 40) {
+                beerCtx.beginPath();
+                beerCtx.arc(cx + 0.8, cy + 0.8, c.r, 0, Math.PI * 2);
+                beerCtx.fillStyle = `rgba(0, 0, 0, ${c.opacity * 0.15})`;
+                beerCtx.fill();
+
+                beerCtx.beginPath();
+                beerCtx.arc(cx, cy, c.r, 0, Math.PI * 2);
+                beerCtx.fillStyle = `rgba(255, 255, 255, ${c.opacity * 0.40})`;
+                beerCtx.fill();
+
+                beerCtx.beginPath();
+                beerCtx.arc(cx - c.r * 0.35, cy - c.r * 0.35, c.r * 0.35, 0, Math.PI * 2);
+                beerCtx.fillStyle = `rgba(255, 255, 255, ${c.opacity * 0.85})`;
+                beerCtx.fill();
+              }
+            }
           }
 
           beerCtx.restore();
