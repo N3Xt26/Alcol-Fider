@@ -884,6 +884,106 @@
         z-index: 1200;
       }
 
+      /* Diplopia Double Vision Effect (Bump Drunk Sdoppiamento) */
+      #section-stage {
+        position: relative;
+      }
+      .drunk-diplopia-ghost {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+        text-align: center;
+        pointer-events: none;
+        user-select: none;
+        z-index: 6;
+        opacity: 0;
+        visibility: hidden;
+        transform: translate(0, 0) rotate(0deg);
+        transform-origin: center center;
+        overflow: visible;
+        will-change: transform, opacity, filter;
+      }
+      .drunk-diplopia-ghost header.drunk-ghost-header {
+        margin-top: max(48px, calc(env(safe-area-inset-top, 14px) + 40px));
+        margin-bottom: 6px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 16px;
+        pointer-events: none;
+      }
+      .drunk-diplopia-ghost.diplopia-active {
+        visibility: visible;
+        animation: drunkDiplopiaBurst 4.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+      @keyframes drunkDiplopiaBurst {
+        0% {
+          opacity: 0;
+          transform: translate(0, 0) rotate(0deg);
+          filter: blur(0px);
+        }
+        10% {
+          opacity: var(--diplopia-opacity, 0.50);
+          transform: translate(calc(var(--diplopia-x, -14px) * 1.15), calc(var(--diplopia-y, 24px) * 1.15)) rotate(calc(var(--diplopia-rot, -1.5deg) * 1.2));
+          filter: blur(0.2px);
+        }
+        22% {
+          opacity: var(--diplopia-opacity, 0.50);
+          transform: translate(var(--diplopia-x, -14px), var(--diplopia-y, 24px)) rotate(var(--diplopia-rot, -1.5deg));
+          filter: blur(0.1px);
+        }
+        42% {
+          opacity: var(--diplopia-opacity, 0.50);
+          transform: translate(calc(var(--diplopia-x, -14px) - 2px), calc(var(--diplopia-y, 24px) + 2px)) rotate(calc(var(--diplopia-rot, -1.5deg) - 0.35deg));
+        }
+        64% {
+          opacity: calc(var(--diplopia-opacity, 0.50) * 0.96);
+          transform: translate(calc(var(--diplopia-x, -14px) + 2px), calc(var(--diplopia-y, 24px) - 2px)) rotate(calc(var(--diplopia-rot, -1.5deg) + 0.35deg));
+        }
+        80% {
+          opacity: calc(var(--diplopia-opacity, 0.50) * 0.75);
+          transform: translate(calc(var(--diplopia-x, -14px) * 0.75), calc(var(--diplopia-y, 24px) * 0.75)) rotate(calc(var(--diplopia-rot, -1.5deg) * 0.7));
+          filter: blur(0.25px);
+        }
+        92% {
+          opacity: calc(var(--diplopia-opacity, 0.50) * 0.25);
+          transform: translate(calc(var(--diplopia-x, -14px) * 0.28), calc(var(--diplopia-y, 24px) * 0.28)) rotate(calc(var(--diplopia-rot, -1.5deg) * 0.28));
+          filter: blur(0.15px);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(0, 0) rotate(0deg);
+          filter: blur(0px);
+          visibility: hidden;
+        }
+      }
+      @keyframes modalDiplopiaPulse {
+        0% {
+          filter: drop-shadow(0 0 0 transparent);
+        }
+        20% {
+          filter: drop-shadow(-8px 12px 0 rgba(224, 124, 106, 0.55));
+        }
+        50% {
+          filter: drop-shadow(-12px 18px 0 rgba(224, 124, 106, 0.40));
+        }
+        80% {
+          filter: drop-shadow(-5px 7px 0 rgba(224, 124, 106, 0.20));
+        }
+        100% {
+          filter: drop-shadow(0 0 0 transparent);
+        }
+      }
+      .drunk-main-hero.modal-diplopia-active {
+        animation: modalDiplopiaPulse 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
       /* Drunk Level 1 (1-2 drinks) */
       body.drunk-lvl-1 #section-stage {
         animation: drunkSwayMild 7s ease-in-out infinite, drunkBlurPulseMild 4.5s ease-in-out infinite;
@@ -1313,6 +1413,11 @@
           id="bottle-img"
           alt="Bottiglia"
         />
+      </div>
+      <!-- Diplopia Double Vision Ghost Layer (Bump Drunk Sdoppiamento) -->
+      <div id="drunk-diplopia-ghost" class="drunk-diplopia-ghost" aria-hidden="true">
+        <header class="drunk-ghost-header"></header>
+        <div class="compass-box drunk-ghost-compass" id="drunk-ghost-compass"></div>
       </div>
     </section>
 
@@ -2190,12 +2295,102 @@
         }
       }
 
+      let diplopiaActive = false;
+      let diplopiaTimer = null;
+      let ghostBottleImg = null;
+
+      function initDiplopiaGhost() {
+        const ghost = document.getElementById("drunk-diplopia-ghost");
+        const ghostCompass = document.getElementById("drunk-ghost-compass");
+        if (ghost && ghostCompass && !ghostBottleImg) {
+          const liveImg = document.getElementById("bottle-img");
+          if (liveImg) {
+            ghostBottleImg = document.createElement("img");
+            ghostBottleImg.src = liveImg.src;
+            ghostBottleImg.className = liveImg.className || "";
+            ghostBottleImg.alt = "";
+            ghostBottleImg.setAttribute("aria-hidden", "true");
+            ghostCompass.appendChild(ghostBottleImg);
+          }
+        }
+      }
+
+      function syncDiplopiaContent() {
+        const ghost = document.getElementById("drunk-diplopia-ghost");
+        const liveHeader = document.querySelector("#section-stage header");
+        if (!ghost || !liveHeader) return;
+
+        let ghostHeader = ghost.querySelector(".drunk-ghost-header");
+        if (!ghostHeader) {
+          ghostHeader = document.createElement("header");
+          ghostHeader.className = "drunk-ghost-header";
+          ghost.insertBefore(ghostHeader, ghost.firstChild);
+        }
+        ghostHeader.innerHTML = liveHeader.innerHTML;
+        ghostHeader.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+      }
+
+      function triggerDiplopia() {
+        if (!drunkEffectsEnabled || drinkCount <= 0) {
+          clearDiplopia();
+          return;
+        }
+        initDiplopiaGhost();
+        syncDiplopiaContent();
+
+        const ghost = document.getElementById("drunk-diplopia-ghost");
+        if (!ghost) return;
+
+        const effective = Math.min(drinkCount, 8);
+        const shiftX = -Math.round(7 + effective * 2.1);
+        const shiftY = Math.round(13 + effective * 3.0);
+        const rotDeg = -(0.7 + effective * 0.28).toFixed(2);
+        const opacityVal = Math.min(0.62, 0.36 + effective * 0.045).toFixed(2);
+
+        ghost.style.setProperty("--diplopia-x", `${shiftX}px`);
+        ghost.style.setProperty("--diplopia-y", `${shiftY}px`);
+        ghost.style.setProperty("--diplopia-rot", `${rotDeg}deg`);
+        ghost.style.setProperty("--diplopia-opacity", opacityVal);
+
+        ghost.classList.remove("diplopia-active");
+        void ghost.offsetWidth; // force reflow
+        ghost.classList.add("diplopia-active");
+        diplopiaActive = true;
+
+        if (diplopiaTimer) clearTimeout(diplopiaTimer);
+        diplopiaTimer = setTimeout(() => {
+          diplopiaActive = false;
+          ghost.classList.remove("diplopia-active");
+        }, 4200);
+      }
+
+      function clearDiplopia() {
+        diplopiaActive = false;
+        if (diplopiaTimer) clearTimeout(diplopiaTimer);
+        const ghost = document.getElementById("drunk-diplopia-ghost");
+        if (ghost) {
+          ghost.classList.remove("diplopia-active");
+        }
+      }
+
+      function triggerModalDiplopia() {
+        const drunkHero = document.querySelector(".drunk-main-hero");
+        if (drunkHero) {
+          drunkHero.classList.remove("modal-diplopia-active");
+          void drunkHero.offsetWidth;
+          drunkHero.classList.add("modal-diplopia-active");
+        }
+      }
+
       function openDrunkModal() {
         if (drunkModal) drunkModal.classList.add("open");
       }
 
       function closeDrunkModal() {
         if (drunkModal) drunkModal.classList.remove("open");
+        if (drunkEffectsEnabled && drinkCount > 0) {
+          triggerDiplopia();
+        }
       }
 
       function addDrink() {
@@ -2206,6 +2401,8 @@
         if (navigator.vibrate) navigator.vibrate(35);
         updateDrunkUI();
         triggerBeerPour(drinkCount);
+        triggerDiplopia();
+        triggerModalDiplopia();
       }
 
       function removeDrink() {
@@ -2215,6 +2412,11 @@
           if (navigator.vibrate) navigator.vibrate(15);
           updateDrunkUI();
           triggerBeerPour(drinkCount);
+          if (drinkCount > 0) {
+            triggerDiplopia();
+          } else {
+            clearDiplopia();
+          }
         }
       }
 
@@ -2225,6 +2427,7 @@
         if (navigator.vibrate) navigator.vibrate([40, 30, 80]);
         updateDrunkUI();
         drainBeerImmediate();
+        clearDiplopia();
       }
 
       function toggleDrunkEffects() {
@@ -2234,8 +2437,10 @@
         updateDrunkUI();
         if (!drunkEffectsEnabled) {
           drainBeerImmediate();
+          clearDiplopia();
         } else if (drinkCount > 0) {
           triggerBeerPour(drinkCount);
+          triggerDiplopia();
         }
       }
 
@@ -3126,6 +3331,10 @@
         appState = "TRACKING";
         iconSpin.classList.remove("searching-anim");
         mainBtn.disabled = false;
+        if (drunkEffectsEnabled && drinkCount > 0) {
+          syncDiplopiaContent();
+          triggerDiplopia();
+        }
       }
 
       async function calculateRoute(place, minSpinTimeMs = 1300) {
@@ -3174,6 +3383,10 @@
         appState = "TRACKING";
         iconSpin.classList.remove("searching-anim");
         mainBtn.disabled = false;
+        if (drunkEffectsEnabled && drinkCount > 0) {
+          syncDiplopiaContent();
+          triggerDiplopia();
+        }
       }
 
       function normalizePlace(place) {
@@ -3549,6 +3762,10 @@
           bottleImg.style.transform = `translate(${orbitX.toFixed(2)}px, ${orbitY.toFixed(2)}px) rotate(${displayAngle.toFixed(2)}deg)`;
         } else {
           bottleImg.style.transform = `rotate(${displayAngle.toFixed(2)}deg)`;
+        }
+
+        if (diplopiaActive && ghostBottleImg) {
+          ghostBottleImg.style.transform = bottleImg.style.transform;
         }
 
         // --- AUDIO & HAPTIC TICKS ---
