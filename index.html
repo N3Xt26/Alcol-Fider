@@ -564,12 +564,12 @@
       .party-modal-card {
         background: white;
         width: 100%;
-        max-width: 360px;
-        border-radius: 28px;
-        padding: 22px 20px;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
-        max-height: 92vh;
-        overflow-y: auto;
+        max-width: 340px;
+        border-radius: 24px;
+        padding: 16px 18px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        max-height: 94vh;
+        max-height: 94dvh;
         animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         display: flex;
         flex-direction: column;
@@ -578,35 +578,36 @@
       .modal-title-wrap {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
       }
       .party-icon-bubble {
-        font-size: 1.6rem;
+        font-size: 1.3rem;
       }
       .modal-title-wrap h3 {
         margin: 0;
-        font-size: 1.05rem;
+        font-size: 0.98rem;
         font-weight: 800;
       }
       .modal-title-wrap p {
-        margin: 2px 0 0 0;
-        font-size: 0.72rem;
+        margin: 1px 0 0 0;
+        font-size: 0.68rem;
         color: var(--text-dim);
       }
       .party-friends-section {
-        margin-bottom: 12px;
+        margin-bottom: 6px;
       }
       .party-input-row {
         display: flex;
-        gap: 8px;
-        margin-bottom: 8px;
+        gap: 6px;
+        margin-bottom: 6px;
       }
       .party-input-row input {
         flex: 1;
-        padding: 8px 14px;
-        border-radius: 14px;
+        padding: 6px 12px;
+        border-radius: 12px;
         border: 1.5px solid #e2e8f0;
-        font-size: 0.82rem;
+        font-size: 0.78rem;
+        height: 32px;
         outline: none;
         transition: border-color 0.2s;
       }
@@ -617,9 +618,9 @@
         background: var(--accent);
         color: white;
         border: none;
-        width: 36px;
-        height: 36px;
-        border-radius: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -632,26 +633,26 @@
       .party-chips-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
-        max-height: 68px;
+        gap: 4px;
+        max-height: 44px;
         overflow-y: auto;
       }
       .party-chip {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
         background: #f1f5f9;
         color: var(--text-main);
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 700;
-        padding: 3px 10px;
+        padding: 2px 8px;
         border-radius: 999px;
       }
       .party-chip-del {
         background: none;
         border: none;
         color: #94a3b8;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         line-height: 1;
         cursor: pointer;
         padding: 0;
@@ -664,78 +665,85 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 8px 0;
+        margin: 4px 0;
       }
       #party-wheel-canvas {
+        width: 210px;
+        height: 210px;
         border-radius: 50%;
-        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
         background: #fff;
       }
       .party-wheel-pointer-pin {
         position: absolute;
-        top: -6px;
+        top: -4px;
         left: 50%;
         transform: translateX(-50%);
         width: 0;
         height: 0;
-        border-left: 12px solid transparent;
-        border-right: 12px solid transparent;
-        border-top: 22px solid #ef4444;
+        border-left: 9px solid transparent;
+        border-right: 9px solid transparent;
+        border-top: 17px solid var(--accent);
         z-index: 10;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.2));
       }
       .party-winner-card {
         display: none;
-        background: #fef3c7;
-        border: 1.5px solid #fde68a;
-        border-radius: 16px;
-        padding: 12px;
+        background: #fdf5ec;
+        border: 1.5px solid #f9d8b7;
+        border-radius: 14px;
+        padding: 6px 10px;
         text-align: center;
-        margin: 8px 0;
+        margin: 4px 0;
         animation: fadeIn 0.3s ease;
       }
       .party-winner-card.visible {
         display: block;
       }
       .party-winner-badge {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         font-weight: 800;
-        color: #b45309;
-        letter-spacing: 1px;
+        color: var(--accent);
+        letter-spacing: 0.8px;
       }
       .party-winner-highlight {
-        font-size: 1.35rem;
+        font-size: 1.15rem;
         font-weight: 900;
-        color: #92400e;
-        margin: 4px 0;
+        color: #8c3b2d;
+        margin: 1px 0;
       }
       .party-winner-cheer {
         margin: 0;
-        font-size: 0.75rem;
-        color: #78350f;
+        font-size: 0.68rem;
+        color: var(--text-dim);
         font-weight: 600;
       }
       .party-actions-row {
-        margin-top: 8px;
+        margin-top: 6px;
         display: flex;
         flex-direction: column;
+        gap: 6px;
+      }
+      .party-actions-row.has-winner {
+        flex-direction: row;
         gap: 8px;
       }
       .party-spin-action-btn {
         background: var(--accent);
         color: white;
         border: none;
-        padding: 12px;
-        border-radius: 16px;
+        padding: 10px 14px;
+        border-radius: 14px;
         font-weight: 800;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        box-shadow: 0 4px 15px rgba(224, 124, 106, 0.35);
+        gap: 6px;
+        box-shadow: 0 4px 12px rgba(224, 124, 106, 0.3);
         transition: transform 0.15s ease, opacity 0.2s ease;
+        flex: 1;
       }
       .party-spin-action-btn:active {
         transform: scale(0.97);
@@ -748,13 +756,17 @@
         background: #2d3436;
         color: white;
         border: none;
-        padding: 10px;
+        padding: 10px 14px;
         border-radius: 14px;
         font-weight: 800;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         cursor: pointer;
         text-align: center;
         transition: transform 0.15s ease;
+        flex: 1;
+        display: none;
+        align-items: center;
+        justify-content: center;
       }
       .party-done-action-btn:active {
         transform: scale(0.97);
@@ -1022,7 +1034,7 @@
 
         <div class="party-wheel-container">
           <div class="party-wheel-pointer-pin"></div>
-          <canvas id="party-wheel-canvas" width="280" height="280"></canvas>
+          <canvas id="party-wheel-canvas" width="210" height="210"></canvas>
         </div>
 
         <div id="party-winner-banner" class="party-winner-card">
@@ -1031,9 +1043,9 @@
           <p class="party-winner-cheer">Salute a tutti! 🍻 Ora andiamo a bere!</p>
         </div>
 
-        <div class="party-actions-row">
+        <div class="party-actions-row" id="party-actions-row">
           <button id="btn-spin-wheel" class="party-spin-action-btn" type="button">
-            <i data-lucide="sparkles" width="18" height="18"></i> GIRA LA RUOTA!
+            <i data-lucide="sparkles" width="16" height="16"></i> GIRA LA RUOTA!
           </button>
           <button id="btn-party-done" class="party-done-action-btn" type="button" style="display:none;">
             CERCA UN LOCALE ➔
@@ -1111,6 +1123,7 @@
       const partyWinnerName = document.getElementById("party-winner-name");
       const spinWheelBtn = document.getElementById("btn-spin-wheel");
       const partyDoneBtn = document.getElementById("btn-party-done");
+      const partyActionsRow = document.getElementById("party-actions-row");
 
       const calibOverlay = document.getElementById("calibration-overlay");
       const calibTitle = document.getElementById("calib-title");
@@ -1371,9 +1384,14 @@
       let lastWheelTickIndex = -1;
 
       const WHEEL_COLORS = [
-        "#FF5A5F", "#FFB400", "#00A699", "#FC642D",
-        "#8B5CF6", "#06B6D4", "#EC4899", "#10B981",
-        "#F59E0B", "#3B82F6", "#EF4444", "#6366F1"
+        "#e07c6a", // Terracotta (Accent)
+        "#85b494", // Sage Green (Green-med)
+        "#e59866", // Warm Amber
+        "#8eb05a", // Olive Green (Green-dark)
+        "#c06c84", // Dusty Rose
+        "#578e87", // Soft Slate Teal
+        "#d4a373", // Warm Ochre Sand
+        "#4b6584"  // Warm Slate Grey
       ];
 
       function openPartyModal() {
@@ -1382,7 +1400,12 @@
           renderPartyChips();
           drawPartyWheel();
           if (partyWinnerBanner) partyWinnerBanner.classList.remove("visible");
+          if (partyActionsRow) partyActionsRow.classList.remove("has-winner");
           if (partyDoneBtn) partyDoneBtn.style.display = "none";
+          if (spinWheelBtn) {
+            spinWheelBtn.innerHTML = '<i data-lucide="sparkles" width="16" height="16"></i> GIRA LA RUOTA!';
+            lucide.createIcons();
+          }
         }
       }
 
@@ -1452,7 +1475,7 @@
         const height = partyWheelCanvas.height;
         const centerX = width / 2;
         const centerY = height / 2;
-        const radius = Math.min(centerX, centerY) - 8;
+        const radius = Math.min(centerX, centerY) - 5;
         const numSlices = partyFriends.length;
         const sliceAngle = (2 * Math.PI) / numSlices;
 
@@ -1472,7 +1495,7 @@
           ctx.closePath();
           ctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length];
           ctx.fill();
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 1.5;
           ctx.strokeStyle = "#ffffff";
           ctx.stroke();
 
@@ -1481,25 +1504,25 @@
           ctx.textAlign = "right";
           ctx.textBaseline = "middle";
           ctx.fillStyle = "#ffffff";
-          ctx.font = "bold 13px 'Plus Jakarta Sans', system-ui, sans-serif";
-          ctx.shadowColor = "rgba(0,0,0,0.35)";
+          ctx.font = "bold 11px system-ui, -apple-system, sans-serif";
+          ctx.shadowColor = "rgba(0,0,0,0.3)";
           ctx.shadowBlur = 3;
 
           let label = partyFriends[i];
-          if (label.length > 10) label = label.substring(0, 9) + "…";
-          ctx.fillText(label, radius - 16, 0);
+          if (label.length > 9) label = label.substring(0, 8) + "…";
+          ctx.fillText(label, radius - 12, 0);
           ctx.restore();
         }
 
         ctx.beginPath();
-        ctx.arc(0, 0, 26, 0, 2 * Math.PI);
+        ctx.arc(0, 0, 20, 0, 2 * Math.PI);
         ctx.fillStyle = "#ffffff";
         ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "#f1f2f6";
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = "#f8f6f4";
         ctx.stroke();
 
-        ctx.font = "18px sans-serif";
+        ctx.font = "15px sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.shadowBlur = 0;
@@ -1513,6 +1536,7 @@
         isWheelSpinning = true;
         if (spinWheelBtn) spinWheelBtn.disabled = true;
         if (partyWinnerBanner) partyWinnerBanner.classList.remove("visible");
+        if (partyActionsRow) partyActionsRow.classList.remove("has-winner");
         if (partyDoneBtn) partyDoneBtn.style.display = "none";
 
         playWhooshSound();
@@ -1549,7 +1573,12 @@
 
             if (partyWinnerName) partyWinnerName.innerText = winner;
             if (partyWinnerBanner) partyWinnerBanner.classList.add("visible");
-            if (partyDoneBtn) partyDoneBtn.style.display = "inline-block";
+            if (partyActionsRow) partyActionsRow.classList.add("has-winner");
+            if (partyDoneBtn) partyDoneBtn.style.display = "inline-flex";
+            if (spinWheelBtn) {
+              spinWheelBtn.innerHTML = '<i data-lucide="rotate-cw" width="16" height="16"></i> RIGIRA';
+              lucide.createIcons();
+            }
 
             playSuccessChime();
             if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
@@ -1560,6 +1589,11 @@
       }
 
       // --- SENSORI ---
+      let compassNeedsCalib = false;
+      window.addEventListener("compassneedscalibration", (e) => {
+        compassNeedsCalib = true;
+      });
+
       if (window.DeviceOrientationEvent && "ontouchstart" in window) {
         window.addEventListener(
           "deviceorientationabsolute",
@@ -1573,10 +1607,14 @@
         window.addEventListener(
           "deviceorientation",
           (e) => {
-            if (e.webkitCompassAccuracy) {
+            if (typeof e.webkitCompassAccuracy === "number" && e.webkitCompassAccuracy >= 0) {
               currentCompassAccuracy = e.webkitCompassAccuracy;
-              if (isCalibrating && currentCompassAccuracy <= 15)
-                completeCalibrationSuccess();
+              if (currentCompassAccuracy > 25) {
+                compassNeedsCalib = true;
+              } else if (currentCompassAccuracy <= 15) {
+                compassNeedsCalib = false;
+                if (isCalibrating) completeCalibrationSuccess();
+              }
             }
             if (currentSpeed > 1) return;
             if (!e.absolute && e.webkitCompassHeading)
@@ -1676,9 +1714,7 @@
               lat: pos.coords.latitude,
               lon: pos.coords.longitude,
             };
-            const needsCalib =
-              currentCompassAccuracy > 15 ||
-              (!hasCalibratedOnce && currentCompassAccuracy === -1);
+            const needsCalib = compassNeedsCalib && !hasCalibratedOnce;
             if (needsCalib) await showCalibrationScreen();
             executeSearch();
           },
@@ -1827,9 +1863,7 @@
         }
 
         if (places.length > 0) {
-          if (currentMode === "RANDOM")
-            setTimeout(() => finalizeSelection(places, radius), 1500);
-          else finalizeSelection(places, radius);
+          finalizeSelection(places, radius);
         } else showError("Nessun locale nel raggio.");
       }
 
@@ -2045,10 +2079,13 @@
         mainBtn.disabled = false;
       }
 
-      async function calculateRoute(place) {
+      async function calculateRoute(place, minSpinTimeMs = 1300) {
         targetText.innerHTML = "Calcolo percorso...";
         targetCoords = { lat: place.lat, lon: place.lon };
-        const data = await getRouteData(place);
+        const [data] = await Promise.all([
+          getRouteData(place),
+          new Promise((resolve) => setTimeout(resolve, minSpinTimeMs)),
+        ]);
         if (data) applyRouteToUI(place, data);
         else displayFallback(place);
       }
@@ -2285,6 +2322,7 @@
         }
 
         mainBtn.disabled = true;
+        appState = "SEARCHING";
         iconSpin.classList.add("searching-anim");
         playWhooshSound();
         velocity = SPIN_SPEED;
