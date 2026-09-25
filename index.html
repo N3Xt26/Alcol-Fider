@@ -850,9 +850,43 @@
         50% { filter: blur(2.2px); }
       }
 
+      /* Rainbow Glow Ring & Chromatic Animations */
+      @keyframes rainbowHueRotate {
+        0% { filter: hue-rotate(0deg); }
+        100% { filter: hue-rotate(360deg); }
+      }
+      @keyframes rainbowRingPulse {
+        0%, 100% { opacity: 0.75; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.002); }
+      }
+      @keyframes drunkCompassPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+      }
+
+      .rainbow-glow-ring {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1500;
+        opacity: 0;
+        transition: opacity 0.6s ease, box-shadow 0.6s ease;
+        box-sizing: border-box;
+      }
+
+      /* Drunk Level 1 (1-2 drinks) */
       body.drunk-lvl-1 #section-stage {
         animation: drunkSwayMild 7s ease-in-out infinite, drunkBlurPulseMild 4.5s ease-in-out infinite;
       }
+      body.drunk-lvl-1 .rainbow-glow-ring {
+        opacity: 0.55;
+        box-shadow: inset 0 0 24px rgba(253, 203, 110, 0.45), inset 0 0 8px rgba(255, 118, 117, 0.35);
+      }
+      body.drunk-lvl-1 .compass-box {
+        box-shadow: 0 0 25px rgba(253, 203, 110, 0.35) !important;
+      }
+
+      /* Drunk Level 2 (3-4 drinks) */
       body.drunk-lvl-2 #section-stage {
         animation: drunkSwayModerate 5.5s ease-in-out infinite, drunkBlurPulseModerate 3.8s ease-in-out infinite;
       }
@@ -860,6 +894,22 @@
       body.drunk-lvl-2 #status {
         text-shadow: -1px 0 rgba(224, 124, 106, 0.45), 1px 0 rgba(133, 180, 148, 0.45);
       }
+      body.drunk-lvl-2 .rainbow-glow-ring {
+        opacity: 0.8;
+        box-shadow:
+          inset 0 0 38px rgba(224, 124, 106, 0.55),
+          inset 0 0 20px rgba(108, 92, 231, 0.45),
+          inset 0 0 8px rgba(253, 203, 110, 0.5);
+        animation: rainbowHueRotate 8s linear infinite;
+      }
+      body.drunk-lvl-2 .compass-box {
+        box-shadow: 0 0 32px rgba(224, 124, 106, 0.45), 0 0 16px rgba(108, 92, 231, 0.35) !important;
+      }
+      body.drunk-lvl-2 .distance-card {
+        box-shadow: 0 8px 30px rgba(224, 124, 106, 0.25), 0 0 15px rgba(108, 92, 231, 0.18) !important;
+      }
+
+      /* Drunk Level 3 (5-6 drinks) */
       body.drunk-lvl-3 #section-stage {
         animation: drunkSwayModerate 4.2s ease-in-out infinite, drunkBlurPulseHeavy 3.2s ease-in-out infinite;
       }
@@ -868,6 +918,29 @@
       body.drunk-lvl-3 .distance-title {
         text-shadow: -1.8px 0 rgba(224, 124, 106, 0.65), 1.8px 0 rgba(108, 92, 231, 0.55);
       }
+      body.drunk-lvl-3 .rainbow-glow-ring {
+        opacity: 0.92;
+        box-shadow:
+          inset 0 0 55px rgba(255, 71, 87, 0.65),
+          inset 0 0 35px rgba(255, 165, 2, 0.6),
+          inset 0 0 20px rgba(46, 213, 115, 0.55),
+          inset 0 0 10px rgba(30, 144, 255, 0.6);
+        animation: rainbowHueRotate 5s linear infinite, rainbowRingPulse 3.5s ease-in-out infinite;
+      }
+      body.drunk-lvl-3 .compass-box {
+        box-shadow: 0 0 45px rgba(255, 71, 87, 0.6), 0 0 25px rgba(46, 213, 115, 0.5), 0 0 15px rgba(30, 144, 255, 0.6) !important;
+        animation: rainbowHueRotate 5s linear infinite;
+      }
+      body.drunk-lvl-3 .distance-card {
+        box-shadow: 0 10px 35px rgba(255, 71, 87, 0.35), 0 0 20px rgba(46, 213, 115, 0.25) !important;
+        animation: rainbowHueRotate 5s linear infinite;
+      }
+      body.drunk-lvl-3 .spin-hub {
+        box-shadow: 0 0 25px rgba(224, 124, 106, 0.5), 0 0 12px rgba(108, 92, 231, 0.4);
+        animation: rainbowHueRotate 5s linear infinite;
+      }
+
+      /* Drunk Level 4 (7+ drinks) */
       body.drunk-lvl-4 #section-stage {
         animation: drunkSwayHeavy 3.4s ease-in-out infinite, drunkBlurPulseHeavy 2.5s ease-in-out infinite;
       }
@@ -876,6 +949,32 @@
       body.drunk-lvl-4 .distance-title,
       body.drunk-lvl-4 #app-label {
         text-shadow: -2.5px 0 rgba(224, 124, 106, 0.8), 2.5px 0 rgba(9, 132, 227, 0.7);
+      }
+      body.drunk-lvl-4 .rainbow-glow-ring {
+        opacity: 1;
+        box-shadow:
+          inset 0 0 85px rgba(255, 71, 87, 0.8),
+          inset 0 0 50px rgba(255, 159, 26, 0.75),
+          inset 0 0 32px rgba(46, 213, 115, 0.7),
+          inset 0 0 18px rgba(112, 161, 255, 0.75),
+          inset 0 0 8px rgba(155, 89, 182, 0.8);
+        animation: rainbowHueRotate 3.2s linear infinite, rainbowRingPulse 2.2s ease-in-out infinite;
+      }
+      body.drunk-lvl-4 .compass-box {
+        box-shadow:
+          0 0 60px rgba(255, 71, 87, 0.75),
+          0 0 35px rgba(255, 165, 2, 0.7),
+          0 0 20px rgba(46, 213, 115, 0.6),
+          0 0 15px rgba(112, 161, 255, 0.7) !important;
+        animation: rainbowHueRotate 3.2s linear infinite, drunkCompassPulse 2.5s ease-in-out infinite;
+      }
+      body.drunk-lvl-4 .distance-card {
+        box-shadow: 0 12px 45px rgba(255, 71, 87, 0.45), 0 0 25px rgba(255, 165, 2, 0.35), 0 0 15px rgba(30, 144, 255, 0.35) !important;
+        animation: rainbowHueRotate 3.2s linear infinite;
+      }
+      body.drunk-lvl-4 .spin-hub {
+        box-shadow: 0 0 35px rgba(255, 71, 87, 0.6), 0 0 18px rgba(108, 92, 231, 0.5);
+        animation: rainbowHueRotate 3.2s linear infinite;
       }
 
       /* Modal Ubriacometro Bump Style */
@@ -1162,6 +1261,9 @@
     </style>
   </head>
   <body>
+    <!-- Rainbow Glow Ring overlay (Drunk UI) -->
+    <div id="rainbow-glow-ring" class="rainbow-glow-ring" aria-hidden="true"></div>
+
     <div id="calibration-overlay">
       <div id="calib-icon-container">
         <i
@@ -3003,10 +3105,17 @@
         const dt = Math.min((currentTime - lastTime) / (1000 / 60), 2);
         lastTime = currentTime;
 
+        const isDrunkActive = drunkEffectsEnabled && drinkCount > 0;
+
         if (appState === "SEARCHING") {
+          let currentSpinSpeed = SPIN_SPEED;
+          if (isDrunkActive) {
+            const slowFactor = Math.max(0.38, 1 - (drinkCount * 0.09));
+            currentSpinSpeed = SPIN_SPEED * slowFactor;
+          }
           velocity =
             velocity * Math.pow(0.98, dt) +
-            SPIN_SPEED * (1 - Math.pow(0.98, dt));
+            currentSpinSpeed * (1 - Math.pow(0.98, dt));
         } else if (appState === "TRACKING" && nextWaypoint) {
           const bearing = calcBearing(
             userCoords.lat,
@@ -3017,9 +3126,17 @@
           let diff = bearing - deviceHeading - angle;
           while (diff < -180) diff += 360;
           while (diff > 180) diff -= 360;
-          const currentSpring = Math.abs(diff) < 5 ? SPRING_SOFT : SPRING_STIFF;
+
+          let springMultiplier = 1;
+          let currentFriction = FRICTION;
+          if (isDrunkActive) {
+            springMultiplier = Math.max(0.35, 1 - (drinkCount * 0.09));
+            currentFriction = Math.max(0.88, FRICTION - drinkCount * 0.008);
+          }
+
+          const currentSpring = (Math.abs(diff) < 5 ? SPRING_SOFT : SPRING_STIFF) * springMultiplier;
           velocity =
-            (velocity + diff * currentSpring * dt) * Math.pow(FRICTION, dt);
+            (velocity + diff * currentSpring * dt) * Math.pow(currentFriction, dt);
 
           if (Math.abs(diff) < 5 && Math.abs(velocity) < 0.5 && !hasVibrated) {
             if (navigator.vibrate) navigator.vibrate(20);
@@ -3030,12 +3147,22 @@
           velocity *= Math.pow(0.92, dt);
         }
         angle += velocity * dt;
+
         let displayAngle = angle;
-        if (drunkEffectsEnabled && drinkCount >= 2) {
-          const wobbleAmp = Math.min(12, (drinkCount - 1) * 2.8);
-          displayAngle += Math.sin(currentTime * 0.003) * wobbleAmp;
+        if (isDrunkActive) {
+          const orbitRadius = Math.min(15, 3.5 + drinkCount * 1.8);
+          const orbitSpeed = 0.0022;
+          const orbitAngle = currentTime * orbitSpeed + (angle * (Math.PI / 180) * 0.3);
+          const orbitX = Math.cos(orbitAngle) * orbitRadius;
+          const orbitY = Math.sin(orbitAngle) * orbitRadius;
+
+          const wobbleAmp = Math.min(14, drinkCount * 2.2);
+          displayAngle += Math.sin(currentTime * 0.0032) * wobbleAmp;
+
+          bottleImg.style.transform = `translate(${orbitX.toFixed(2)}px, ${orbitY.toFixed(2)}px) rotate(${displayAngle.toFixed(2)}deg)`;
+        } else {
+          bottleImg.style.transform = `rotate(${displayAngle.toFixed(2)}deg)`;
         }
-        bottleImg.style.transform = `rotate(${displayAngle}deg)`;
 
         // --- AUDIO & HAPTIC TICKS ---
         const speed = Math.abs(velocity);
