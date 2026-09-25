@@ -2338,7 +2338,12 @@
       function closeDrunkModal() {
         if (drunkModal) drunkModal.classList.remove("open");
         if (drunkEffectsEnabled && drinkCount > 0) {
-          triggerBeerPour(drinkCount);
+          targetBeerLevel = getBeerTargetLevel(drinkCount);
+          beerLevel = targetBeerLevel; // La birra deve già essere stata versata alla chiusura del pannello!
+          beerState = "SETTLED";
+          sloshImpulse = Math.max(sloshImpulse, 14);
+          beerPourTimer = 5000;
+          startBeerLoop();
           triggerDiplopia();
         }
       }
@@ -2350,6 +2355,9 @@
         triggerBumpShake();
         if (navigator.vibrate) navigator.vibrate(35);
         updateDrunkUI();
+        if (drunkEffectsEnabled) {
+          triggerBeerPour(drinkCount);
+        }
       }
 
       function removeDrink() {
@@ -2358,6 +2366,9 @@
           localStorage.setItem("alcol_drink_count", drinkCount);
           if (navigator.vibrate) navigator.vibrate(15);
           updateDrunkUI();
+          if (drunkEffectsEnabled) {
+            triggerBeerPour(drinkCount);
+          }
         }
       }
 
@@ -3604,7 +3615,6 @@
               if (d < 15) {
                 statusText.innerHTML = "Sei arrivato! 🍻";
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                compassBox.style.borderColor = "var(--green-med)";
               }
             }
           },
@@ -3614,17 +3624,8 @@
       }
 
       function updateVisualFeedback(distance) {
-        let intensity = Math.max(0, Math.min(1, 1 - (distance - 50) / 450));
         compassBox.style.boxShadow = "0 10px 40px rgba(0, 0, 0, 0.04)";
-        if (distance > 500) {
-          compassBox.style.borderColor = "var(--cold)";
-        } else {
-          if (distance < 100) {
-            compassBox.style.borderColor = "var(--hot)";
-          } else {
-            compassBox.style.borderColor = "white";
-          }
-        }
+        compassBox.style.borderColor = "white";
       }
 
       function physicsLoop(currentTime) {
