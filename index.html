@@ -1473,8 +1473,8 @@
         width: 18px;
         height: 18px;
         border-radius: 50%;
-        background: radial-gradient(circle, #ffffff 15%, #ffd32a 55%, transparent 75%);
-        box-shadow: 0 0 45px #fed330, 0 0 90px #f39c12;
+        background: radial-gradient(circle, rgba(255,255,255,0.7) 5%, rgba(255,211,42,0.8) 40%, transparent 75%);
+        box-shadow: 0 0 30px rgba(254,211,48,0.7), 0 0 60px rgba(243,156,18,0.4);
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.1);
         pointer-events: none;
@@ -1484,15 +1484,15 @@
       }
       @keyframes cheersImpactFlash {
         0% {
-          opacity: 1;
+          opacity: 0.8;
           transform: translate(-50%, -50%) scale(0.2);
         }
         40% {
-          opacity: 0.95;
+          opacity: 0.5;
         }
         100% {
           opacity: 0;
-          transform: translate(-50%, -50%) scale(8);
+          transform: translate(-50%, -50%) scale(4);
         }
       }
 
@@ -1604,12 +1604,10 @@
     <!-- Bump Active Connecting Ring (Attivo durante lo shake per connettersi con smartphone vicini) -->
     <div id="bump-active-ring" aria-hidden="true">
       <div class="bump-ripple"></div>
+      <div class="bump-ripple" style="animation-delay: 0.3s"></div>
       <div class="bump-ripple" style="animation-delay: 0.6s"></div>
+      <div class="bump-ripple" style="animation-delay: 0.9s"></div>
       <div class="bump-ripple" style="animation-delay: 1.2s"></div>
-      <div class="bump-active-badge">
-        <span class="bump-radar-dot"></span>
-        <span>Cerca Cin-Cin attivo</span>
-      </div>
     </div>
 
     <div id="calibration-overlay">
@@ -4453,36 +4451,46 @@
       function triggerCheersAnimation() {
         if (isCheersInProgress) return;
         isCheersInProgress = true;
-        setTimeout(() => { isCheersInProgress = false; }, 3500);
+        
+        // Rimuove immediatamente il record per evitare altri match, ma lascia la wave
+        if (myCurrentBumpRef) {
+          myCurrentBumpRef.off();
+          myCurrentBumpRef.remove().catch(() => {});
+          myCurrentBumpRef = null;
+        }
 
-        // Interrompi immediatamente la finestra di ascolto dello shake e rimuovi il record
-        stopLocalShakeWindow();
-
-        const modal = document.getElementById("bump-cheers-modal");
-        if (!modal) return;
-
-        // Reset animazioni
-        modal.classList.remove("open", "closing", "impact-active");
-        void modal.offsetWidth; // forza reflow
-        modal.classList.add("open");
-
-        // Al momento dello scontro (380ms: calici inclinati al centro)
         setTimeout(() => {
-          modal.classList.add("impact-active");
-          triggerBumpShake(); // applica classe bump-shake-active per impatto fisico
-          playCheersClinkSound(); // suono cristallino "clink" via getAudioContext()
-          if (navigator.vibrate) navigator.vibrate([60, 40, 100]); // aptico
-          addDrink(); // incrementa ubriacometro e versa birra
-        }, 380);
+          setTimeout(() => { isCheersInProgress = false; }, 3500);
 
-        // Mostra per 2.5 secondi e poi chiudi con dissolvenza fluida
-        if (cheersCloseTimer) clearTimeout(cheersCloseTimer);
-        cheersCloseTimer = setTimeout(() => {
-          modal.classList.add("closing");
+          // Interrompi la finestra di ascolto dello shake
+          stopLocalShakeWindow();
+
+          const modal = document.getElementById("bump-cheers-modal");
+          if (!modal) return;
+
+          // Reset animazioni
+          modal.classList.remove("open", "closing", "impact-active");
+          void modal.offsetWidth; // forza reflow
+          modal.classList.add("open");
+
+          // Al momento dello scontro (380ms: calici inclinati al centro)
           setTimeout(() => {
-            modal.classList.remove("open", "closing", "impact-active");
-          }, 400);
-        }, 2500);
+            modal.classList.add("impact-active");
+            triggerBumpShake(); // applica classe bump-shake-active per impatto fisico
+            playCheersClinkSound(); // suono cristallino "clink" via getAudioContext()
+            if (navigator.vibrate) navigator.vibrate([60, 40, 100]); // aptico
+            addDrink(); // incrementa ubriacometro e versa birra
+          }, 380);
+
+          // Mostra per 2.5 secondi e poi chiudi con dissolvenza fluida
+          if (cheersCloseTimer) clearTimeout(cheersCloseTimer);
+          cheersCloseTimer = setTimeout(() => {
+            modal.classList.add("closing");
+            setTimeout(() => {
+              modal.classList.remove("open", "closing", "impact-active");
+            }, 400);
+          }, 2500);
+        }, 1500);
       }
 
       // Esponi per test e debug manuale
