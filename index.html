@@ -130,14 +130,15 @@
 
       /* Controlli */
       #section-controls {
-        height: 86px;
         flex-shrink: 0;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        gap: 12px;
         padding: 0 25px;
         position: relative;
-        margin-bottom: clamp(40px, 6vh, 56px);
+        margin-bottom: clamp(20px, 4vh, 40px);
         z-index: 10;
       }
       .distance-card {
@@ -1634,6 +1635,13 @@
     </section>
 
     <section id="section-controls">
+      <div class="distance-card active" id="compass-mode-card" style="flex-direction:row; justify-content:space-between; align-items:center; padding: 10px 20px;">
+        <span class="panel-label" style="margin-bottom:0;">MODALITÀ BUSSOLA</span>
+        <select id="compass-mode-select" style="padding: 4px; border-radius: 8px; border: 1px solid #ccc; font-weight: bold; background: white; outline: none;">
+          <option value="normal" selected>Normale</option>
+          <option value="step">Step-by-step</option>
+        </select>
+      </div>
       <div class="distance-card" id="radius-card">
         <span class="panel-label">RAGGIO DI RICERCA</span>
         <input
@@ -4021,12 +4029,16 @@
           velocity =
             velocity * Math.pow(0.98, dt) +
             currentSpinSpeed * (1 - Math.pow(0.98, dt));
-        } else if (appState === "TRACKING" && nextWaypoint) {
+        } else if (appState === "TRACKING" && nextWaypoint && targetCoords) {
+          const compassModeSelect = document.getElementById("compass-mode-select");
+          const isStepByStep = compassModeSelect && compassModeSelect.value === "step";
+          const targetLat = isStepByStep ? nextWaypoint.lat : targetCoords.lat;
+          const targetLon = isStepByStep ? nextWaypoint.lon : targetCoords.lon;
           const bearing = calcBearing(
             userCoords.lat,
             userCoords.lon,
-            nextWaypoint.lat,
-            nextWaypoint.lon,
+            targetLat,
+            targetLon,
           );
           let diff = bearing - deviceHeading - angle;
           while (diff < -180) diff += 360;
