@@ -4259,9 +4259,10 @@
 
       // Gestione del ring radar attorno allo schermo durante lo shake
       let bumpRingTimer = null;
-      const BUMP_ACTIVE_WINDOW = 2000; // Il ring e la finestra di connessione restano attivi 2s (o per tutta la durata dello shake)
+      const BUMP_ACTIVE_WINDOW = 4000; // Finestra attiva di 4s per garantire sincronizzazione tra dispositivi e compensare i clock
       let lastFirebaseBumpTime = 0;
       const FIREBASE_BUMP_THROTTLE = 900; // Pubblica su Firebase al massimo ogni 0.9s se lo shake continua
+      let myCurrentBumpRef = null;
 
       function showBumpActiveRing() {
         const ring = document.getElementById("bump-active-ring");
@@ -4295,20 +4296,43 @@
               const now = Date.now();
               const timeDelta = Math.abs(now - (bump.t || 0));
 
-              // Verifica finestra temporale: mentre il ring è visualizzato (fino a 2000 ms)
-              if (timeDelta > BUMP_ACTIVE_WINDOW) return;
+              // Se entrambi hanno coordinate GPS reali, verifica <= 25m.
+              // Se uno dei due dispositivi è senza GPS (es. test da PC o prima di concedere il GPS),
+              // considera la distanza valida (0m) per consentire il test/debug tra dispositivi.
+              const hasMyGps = userCoords && typeof userCoords.lat === "number" && typeof userCoords.lon === "number" && (userCoords.lat !== 0 || userCoords.lon !== 0);
+              const hasPeerGps = typeof bump.lat === "number" && typeof bump.lon === "number" && (bump.lat !== 0 || bump.lon !== 0);
 
-              // Distanza <= 25 metri con formula Haversine
-              if (!userCoords || isNaN(userCoords.lat) || isNaN(userCoords.lon)) return;
-              if (typeof bump.lat !== "number" || typeof bump.lon !== "number") return;
+              const dist = (hasMyGps && hasPeerGps)
+                ? getDist(userCoords.lat, userCoords.lon, bump.lat, bump.lon)
+                : 0;
 
-              const dist = getDist(userCoords.lat, userCoords.lon, bump.lat, bump.lon);
-              if (dist <= 25) {
-                // Il primo client che convalida il match rimuove il record dal database
-                snapshot.ref.remove().catch(() => {});
-                hideBumpActiveRing();
-                triggerCheersAnimation();
+              console.log(`[Cin-Cin Bump] 📡 Ricevuto bump da ${bump.id}. timeDelta: ${timeDelta}ms, dist: ${Math.round(dist)}m`);
+
+              const MAX_BUMP_TIME_DELTA = 5500; // Tolleranza 5.5s per assorbire clock skew tra due telefoni
+              if (timeDelta > MAX_BUMP_TIME_DELTA) {
+                console.log(`[Cin-Cin Bump] ⏳ Ignorato: scaduto (${timeDelta}ms > ${MAX_BUMP_TIME_DELTA}ms)`);
+                return;
               }
+
+              // Soglia di prossimità: 25m all'aperto, estesa fino a 80m per assorbire la normale accuratezza GPS indoor
+              const MAX_BUMP_DIST = 80;
+              if (dist > MAX_BUMP_DIST) {
+                console.log(`[Cin-Cin Bump] 📍 Ignorato: troppo lontano (${Math.round(dist)}m > ${MAX_BUMP_DIST}m, soglia base 25m)`);
+                return;
+              }
+
+              console.log(`[Cin-Cin Bump] 🍻 MATCH CONVALIDATO con ${bump.id}!`);
+
+              // Notifica istantanea all'altro dispositivo scrivendo sul suo nodo
+              snapshot.ref.child("matched").set(myClientId).catch(() => {});
+
+              // Rimuovi dopo 1.5s per pulire il database
+              setTimeout(() => {
+                snapshot.ref.remove().catch(() => {});
+              }, 1500);
+
+              hideBumpActiveRing();
+              triggerCheersAnimation();
             });
           }
         } catch (e) {
@@ -4325,21 +4349,47 @@
         const lat = (userCoords && typeof userCoords.lat === "number") ? userCoords.lat : 0;
         const lon = (userCoords && typeof userCoords.lon === "number") ? userCoords.lon : 0;
 
+        console.log(`[Cin-Cin Bump] 📱 Bump pubblicato (ID: ${myClientId}, lat: ${lat}, lon: ${lon})`);
+
         if (activeBumpsRef) {
           try {
+            if (myCurrentBumpRef) {
+              myCurrentBumpRef.off();
+              myCurrentBumpRef.remove().catch(() => {});
+            }
+
             const newBumpRef = activeBumpsRef.push();
+            myCurrentBumpRef = newBumpRef;
+
             newBumpRef.set({
               id: myClientId,
               lat: lat,
               lon: lon,
               t: Date.now()
             });
+
+            // Ascolta se l'altro dispositivo convalida il nostro bump (handshake bidirezionale)
+            newBumpRef.child("matched").on("value", (snap) => {
+              const matchedPeer = snap.val();
+              if (matchedPeer) {
+                console.log(`[Cin-Cin Bump] 🤝 Match confermato da peer: ${matchedPeer}!`);
+                hideBumpActiveRing();
+                triggerCheersAnimation();
+                setTimeout(() => {
+                  newBumpRef.remove().catch(() => {});
+                }, 1000);
+              }
+            });
+
             // Auto-rimozione su disconnessione
             newBumpRef.onDisconnect().remove();
 
-            // Timeout locale a 2 secondi per non intasare il database
+            // Timeout di pulizia locale a BUMP_ACTIVE_WINDOW
             setTimeout(() => {
-              newBumpRef.remove().catch(() => {});
+              if (myCurrentBumpRef === newBumpRef) {
+                newBumpRef.off();
+                newBumpRef.remove().catch(() => {});
+              }
             }, BUMP_ACTIVE_WINDOW);
           } catch (err) {
             console.warn("Errore pubblicazione bump su Firebase:", err);
@@ -4413,7 +4463,12 @@
         }
       }
 
+      let isCheersInProgress = false;
       function triggerCheersAnimation() {
+        if (isCheersInProgress) return;
+        isCheersInProgress = true;
+        setTimeout(() => { isCheersInProgress = false; }, 3200);
+
         hideBumpActiveRing();
 
         const modal = document.getElementById("bump-cheers-modal");
@@ -4450,6 +4505,21 @@
       // Inizializzazione motion banner e permessi su iOS / Streamlit
       window.addEventListener("DOMContentLoaded", () => {
         initFirebaseBump();
+
+        // Acquisizione automatica iniziale posizione per il Bump
+        if (navigator.geolocation && !userCoords) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              userCoords = {
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude
+              };
+              console.log("[GPS] Posizione acquisita per Bump Cin-Cin:", userCoords);
+            },
+            () => {},
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+          );
+        }
 
         const banner = document.getElementById("motion-perm-banner");
         const btnGrant = document.getElementById("btn-grant-motion");
