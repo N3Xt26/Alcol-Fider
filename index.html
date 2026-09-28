@@ -4297,16 +4297,15 @@
               const timeDelta = Math.abs(now - (bump.t || 0));
 
               // Se entrambi hanno coordinate GPS reali, verifica <= 25m.
-              // Se uno dei due dispositivi è senza GPS (es. test da PC o prima di concedere il GPS),
-              // considera la distanza valida (0m) per consentire il test/debug tra dispositivi.
+              const isDistanceIgnored = bump.ignoreDistance === true || window.__ignoreBumpDistance === true;
               const hasMyGps = userCoords && typeof userCoords.lat === "number" && typeof userCoords.lon === "number" && (userCoords.lat !== 0 || userCoords.lon !== 0);
               const hasPeerGps = typeof bump.lat === "number" && typeof bump.lon === "number" && (bump.lat !== 0 || bump.lon !== 0);
 
-              const dist = (hasMyGps && hasPeerGps)
+              const dist = (!isDistanceIgnored && hasMyGps && hasPeerGps)
                 ? getDist(userCoords.lat, userCoords.lon, bump.lat, bump.lon)
                 : 0;
 
-              console.log(`[Cin-Cin Bump] 📡 Ricevuto bump da ${bump.id}. timeDelta: ${timeDelta}ms, dist: ${Math.round(dist)}m`);
+              console.log(`[Cin-Cin Bump] 📡 Ricevuto bump da ${bump.id}. timeDelta: ${timeDelta}ms, dist: ${Math.round(dist)}m, ignoraDistanza: ${isDistanceIgnored}`);
 
               const MAX_BUMP_TIME_DELTA = 5500; // Tolleranza 5.5s per assorbire clock skew tra due telefoni
               if (timeDelta > MAX_BUMP_TIME_DELTA) {
@@ -4314,9 +4313,9 @@
                 return;
               }
 
-              // Soglia di prossimità: 25m all'aperto, estesa fino a 80m per assorbire la normale accuratezza GPS indoor
+              // Soglia di prossimità: 25m all'aperto, estesa fino a 80m per assorbire la normale accuratezza GPS indoor (se non ignorata in debug)
               const MAX_BUMP_DIST = 80;
-              if (dist > MAX_BUMP_DIST) {
+              if (!isDistanceIgnored && dist > MAX_BUMP_DIST) {
                 console.log(`[Cin-Cin Bump] 📍 Ignorato: troppo lontano (${Math.round(dist)}m > ${MAX_BUMP_DIST}m, soglia base 25m)`);
                 return;
               }
@@ -4340,7 +4339,7 @@
         }
       }
 
-      function publishBumpEvent() {
+      function publishBumpEvent(options = {}) {
         showBumpActiveRing();
 
         // Feedback aptico leggero immediato sullo shake
@@ -4348,8 +4347,9 @@
 
         const lat = (userCoords && typeof userCoords.lat === "number") ? userCoords.lat : 0;
         const lon = (userCoords && typeof userCoords.lon === "number") ? userCoords.lon : 0;
+        const ignoreDistance = (options && options.ignoreDistance === true) || window.__ignoreBumpDistance === true;
 
-        console.log(`[Cin-Cin Bump] 📱 Bump pubblicato (ID: ${myClientId}, lat: ${lat}, lon: ${lon})`);
+        console.log(`[Cin-Cin Bump] 📱 Bump pubblicato (ID: ${myClientId}, lat: ${lat}, lon: ${lon}, ignoraDistanza: ${ignoreDistance})`);
 
         if (activeBumpsRef) {
           try {
@@ -4365,7 +4365,8 @@
               id: myClientId,
               lat: lat,
               lon: lon,
-              t: Date.now()
+              t: Date.now(),
+              ignoreDistance: ignoreDistance
             });
 
             // Ascolta se l'altro dispositivo convalida il nostro bump (handshake bidirezionale)
@@ -4399,6 +4400,18 @@
           triggerCheersAnimation();
         }
       }
+
+      // Funzione di debug richiamabile da console per simulare lo shake da PC ignorando la distanza GPS
+      function debugShake(ignoreDistance = true) {
+        window.__ignoreBumpDistance = ignoreDistance;
+        console.log(`%c[Cin-Cin Debug] 🚀 Shake simulato (ignoraDistanza = ${ignoreDistance})`, "color: #fed330; font-weight: bold; font-size: 13px;");
+        publishBumpEvent({ ignoreDistance: ignoreDistance });
+      }
+
+      window.debugShake = debugShake;
+      window.simulateBump = debugShake;
+      window.testShake = debugShake;
+      window.publishBumpEvent = publishBumpEvent;
 
       function handleDeviceMotion(e) {
         let ax = 0, ay = 0, az = 0;
@@ -4505,6 +4518,8 @@
       // Inizializzazione motion banner e permessi su iOS / Streamlit
       window.addEventListener("DOMContentLoaded", () => {
         initFirebaseBump();
+
+        console.log("%c[Cin-Cin Debug] Per testare lo shake da PC ignorando la distanza scrivi: debugShake()", "color: #fed330; font-weight: bold; font-size: 12px;");
 
         // Acquisizione automatica iniziale posizione per il Bump
         if (navigator.geolocation && !userCoords) {
