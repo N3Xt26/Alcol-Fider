@@ -1303,7 +1303,7 @@
         pointer-events: auto;
       }
 
-      /* --- BUMP CIN-CIN ACTIVE CONNECTING RING AROUND SCREEN --- */
+      /* --- BUMP CIN-CIN ACTIVE CONNECTING RIPPLES --- */
       #bump-active-ring {
         position: fixed;
         inset: 0;
@@ -1311,17 +1311,39 @@
         z-index: 2200;
         opacity: 0;
         transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        box-sizing: border-box;
-        border: 5px solid rgba(254, 211, 48, 0.92);
-        box-shadow:
-          inset 0 0 45px rgba(243, 156, 18, 0.7),
-          inset 0 0 90px rgba(254, 211, 48, 0.3),
-          0 0 30px rgba(254, 211, 48, 0.7),
-          0 0 65px rgba(243, 156, 18, 0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
       }
       #bump-active-ring.active {
         opacity: 1;
-        animation: bumpRingPulse 1.1s ease-in-out infinite alternate;
+      }
+      .bump-ripple {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 2px solid rgba(254, 211, 48, 0.8);
+        box-shadow: 0 0 20px rgba(254, 211, 48, 0.4), inset 0 0 20px rgba(254, 211, 48, 0.4);
+        opacity: 0;
+        pointer-events: none;
+      }
+      #bump-active-ring.active .bump-ripple {
+        animation: bumpRippleAnim 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+      }
+      @keyframes bumpRippleAnim {
+        0% {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        20% {
+          opacity: 1;
+        }
+        100% {
+          transform: scale(8);
+          opacity: 0;
+        }
       }
       .bump-active-badge {
         position: absolute;
@@ -1360,23 +1382,6 @@
       @keyframes bumpRadarBlink {
         0% { opacity: 0.3; transform: scale(0.8); }
         100% { opacity: 1; transform: scale(1.3); }
-      }
-      @keyframes bumpRingPulse {
-        0% {
-          border-color: rgba(254, 211, 48, 0.75);
-          box-shadow:
-            inset 0 0 35px rgba(243, 156, 18, 0.5),
-            inset 0 0 60px rgba(254, 211, 48, 0.2),
-            0 0 20px rgba(254, 211, 48, 0.5);
-        }
-        100% {
-          border-color: rgba(255, 184, 77, 1);
-          box-shadow:
-            inset 0 0 60px rgba(243, 156, 18, 0.9),
-            inset 0 0 120px rgba(254, 211, 48, 0.45),
-            0 0 45px rgba(254, 211, 48, 0.9),
-            0 0 80px rgba(243, 156, 18, 0.55);
-        }
       }
 
       /* --- BUMP CIN-CIN CHEERS FULLSCREEN OVERLAY WITH BACKDROP BLUR --- */
@@ -1669,6 +1674,9 @@
 
     <!-- Bump Active Connecting Ring (Attivo durante lo shake per connettersi con smartphone vicini) -->
     <div id="bump-active-ring" aria-hidden="true">
+      <div class="bump-ripple"></div>
+      <div class="bump-ripple" style="animation-delay: 0.6s"></div>
+      <div class="bump-ripple" style="animation-delay: 1.2s"></div>
       <div class="bump-active-badge">
         <span class="bump-radar-dot"></span>
         <span>Cerca Cin-Cin attivo</span>
