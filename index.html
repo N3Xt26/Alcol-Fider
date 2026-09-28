@@ -1309,49 +1309,91 @@
         inset: 0;
         pointer-events: none;
         z-index: 2200;
-        border: 4px solid rgba(254, 211, 48, 0.85);
-        box-shadow:
-          inset 0 0 35px rgba(243, 156, 18, 0.65),
-          inset 0 0 15px rgba(254, 211, 48, 0.8),
-          0 0 20px rgba(243, 156, 18, 0.5);
         opacity: 0;
-        transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         box-sizing: border-box;
+        border: 5px solid rgba(254, 211, 48, 0.92);
+        box-shadow:
+          inset 0 0 45px rgba(243, 156, 18, 0.7),
+          inset 0 0 90px rgba(254, 211, 48, 0.3),
+          0 0 30px rgba(254, 211, 48, 0.7),
+          0 0 65px rgba(243, 156, 18, 0.4);
       }
       #bump-active-ring.active {
         opacity: 1;
         animation: bumpRingPulse 1.1s ease-in-out infinite alternate;
       }
+      .bump-active-badge {
+        position: absolute;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-8px);
+        background: rgba(18, 20, 26, 0.88);
+        border: 1.5px solid rgba(254, 211, 48, 0.75);
+        color: #fed330;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        padding: 7px 18px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 20px rgba(254, 211, 48, 0.4);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        opacity: 0;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      }
+      #bump-active-ring.active .bump-active-badge {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .bump-radar-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #fed330;
+        box-shadow: 0 0 10px #fed330;
+        animation: bumpRadarBlink 0.9s ease-in-out infinite alternate;
+      }
+      @keyframes bumpRadarBlink {
+        0% { opacity: 0.3; transform: scale(0.8); }
+        100% { opacity: 1; transform: scale(1.3); }
+      }
       @keyframes bumpRingPulse {
         0% {
-          border-color: rgba(254, 211, 48, 0.7);
+          border-color: rgba(254, 211, 48, 0.75);
           box-shadow:
-            inset 0 0 25px rgba(243, 156, 18, 0.45),
-            inset 0 0 10px rgba(254, 211, 48, 0.65);
+            inset 0 0 35px rgba(243, 156, 18, 0.5),
+            inset 0 0 60px rgba(254, 211, 48, 0.2),
+            0 0 20px rgba(254, 211, 48, 0.5);
         }
         100% {
-          border-color: rgba(255, 177, 66, 0.95);
+          border-color: rgba(255, 184, 77, 1);
           box-shadow:
-            inset 0 0 48px rgba(243, 156, 18, 0.85),
-            inset 0 0 22px rgba(254, 211, 48, 0.95),
-            0 0 25px rgba(243, 156, 18, 0.6);
+            inset 0 0 60px rgba(243, 156, 18, 0.9),
+            inset 0 0 120px rgba(254, 211, 48, 0.45),
+            0 0 45px rgba(254, 211, 48, 0.9),
+            0 0 80px rgba(243, 156, 18, 0.55);
         }
       }
 
-      /* --- BUMP CIN-CIN CHEERS MODAL & GLASSES ANIMATION --- */
+      /* --- BUMP CIN-CIN CHEERS FULLSCREEN OVERLAY WITH BACKDROP BLUR --- */
       .bump-cheers-modal {
         position: fixed;
         inset: 0;
         z-index: 3000;
         display: none;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: rgba(18, 20, 24, 0.62);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        background: radial-gradient(circle at 50% 45%, rgba(18, 22, 30, 0.72) 0%, rgba(10, 12, 16, 0.88) 100%);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         opacity: 0;
         transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        padding: 20px;
+        padding: 24px;
         box-sizing: border-box;
       }
       .bump-cheers-modal.open {
@@ -1363,41 +1405,33 @@
         transition: opacity 0.4s ease;
       }
       .cheers-card {
-        background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.98), rgba(253, 247, 240, 0.95));
+        background: transparent;
+        border: none;
+        box-shadow: none;
         width: 100%;
-        max-width: 320px;
-        border-radius: 28px;
-        padding: 24px 20px 22px;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35), 0 0 40px rgba(243, 156, 18, 0.25);
+        max-width: 440px;
         display: flex;
         flex-direction: column;
         align-items: center;
         text-align: center;
         position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.8);
-      }
-      .cheers-card::before {
-        content: '';
-        position: absolute;
-        inset: -50%;
-        background: radial-gradient(circle, rgba(254, 211, 48, 0.15), transparent 70%);
-        pointer-events: none;
+        padding: 0;
       }
       .cheers-stage {
         position: relative;
-        width: 260px;
-        height: 155px;
+        width: 320px;
+        height: 200px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 12px;
+        margin-bottom: 22px;
       }
       .cheers-glass-wrapper {
         position: absolute;
-        width: 95px;
-        height: 145px;
-        top: 6px;
+        width: 120px;
+        height: 180px;
+        top: 8px;
+        filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 25px rgba(254, 211, 48, 0.35));
       }
       .glass-wrap-left {
         left: 20px;
@@ -1410,44 +1444,44 @@
 
       /* Slide and Toasting Collision Animations (tilt 20deg and -20deg) */
       .bump-cheers-modal.open .glass-wrap-left {
-        animation: glassClinkLeft 0.52s cubic-bezier(0.2, 0.8, 0.2, 1.25) forwards;
+        animation: glassClinkLeft 0.54s cubic-bezier(0.2, 0.8, 0.2, 1.25) forwards;
       }
       .bump-cheers-modal.open .glass-wrap-right {
-        animation: glassClinkRight 0.52s cubic-bezier(0.2, 0.8, 0.2, 1.25) forwards;
+        animation: glassClinkRight 0.54s cubic-bezier(0.2, 0.8, 0.2, 1.25) forwards;
       }
 
       @keyframes glassClinkLeft {
         0% {
-          transform: translateX(-120px) rotate(-16deg);
+          transform: translateX(-140px) rotate(-16deg);
           opacity: 0;
         }
         60% {
-          transform: translateX(25px) rotate(22deg);
+          transform: translateX(30px) rotate(22deg);
           opacity: 1;
         }
         78% {
-          transform: translateX(18px) rotate(17deg);
+          transform: translateX(20px) rotate(17deg);
         }
         100% {
-          transform: translateX(22px) rotate(20deg);
+          transform: translateX(25px) rotate(20deg);
           opacity: 1;
         }
       }
 
       @keyframes glassClinkRight {
         0% {
-          transform: translateX(120px) rotate(16deg);
+          transform: translateX(140px) rotate(16deg);
           opacity: 0;
         }
         60% {
-          transform: translateX(-25px) rotate(-22deg);
+          transform: translateX(-30px) rotate(-22deg);
           opacity: 1;
         }
         78% {
-          transform: translateX(-18px) rotate(-17deg);
+          transform: translateX(-20px) rotate(-17deg);
         }
         100% {
-          transform: translateX(-22px) rotate(-20deg);
+          transform: translateX(-25px) rotate(-20deg);
           opacity: 1;
         }
       }
@@ -1455,13 +1489,43 @@
       .cheers-glass-svg {
         width: 100%;
         height: 100%;
-        filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.18));
+      }
+
+      /* Golden Impact Flash Shockwave */
+      .cheers-impact-flash {
+        position: absolute;
+        top: 60px;
+        left: 50%;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffffff 15%, #ffd32a 55%, transparent 75%);
+        box-shadow: 0 0 45px #fed330, 0 0 90px #f39c12;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.1);
+        pointer-events: none;
+      }
+      .bump-cheers-modal.impact-active .cheers-impact-flash {
+        animation: cheersImpactFlash 0.75s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+      }
+      @keyframes cheersImpactFlash {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(0.2);
+        }
+        40% {
+          opacity: 0.95;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(8);
+        }
       }
 
       /* Golden Sparks / Particles */
       .cheers-sparks-container {
         position: absolute;
-        top: 48px;
+        top: 60px;
         left: 50%;
         transform: translate(-50%, -50%);
         width: 10px;
@@ -1473,30 +1537,30 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 7px;
-        height: 7px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
-        background: radial-gradient(circle, #ffffff 15%, #ffd32a 65%, #ff793f 100%);
-        box-shadow: 0 0 10px #ffd32a, 0 0 16px #ff9f1a;
+        background: radial-gradient(circle, #ffffff 20%, #ffd32a 65%, #ff793f 100%);
+        box-shadow: 0 0 14px #ffd32a, 0 0 24px #ff9f1a;
         opacity: 0;
         transform: translate(-50%, -50%);
       }
       .bump-cheers-modal.impact-active .spark {
-        animation: sparkRadiate 0.85s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+        animation: sparkRadiate 0.92s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
       }
 
-      .spark.s1  { --dx: 0px;   --dy: -56px; --scale: 1.25; }
-      .spark.s2  { --dx: 38px;  --dy: -42px; --scale: 0.95; }
-      .spark.s3  { --dx: 54px;  --dy: -10px; --scale: 1.15; }
-      .spark.s4  { --dx: 42px;  --dy: 28px;  --scale: 0.85; }
-      .spark.s5  { --dx: 12px;  --dy: 52px;  --scale: 1.05; }
-      .spark.s6  { --dx: -16px; --dy: 54px;  --scale: 0.90; }
-      .spark.s7  { --dx: -45px; --dy: 26px;  --scale: 1.10; }
-      .spark.s8  { --dx: -56px; --dy: -12px; --scale: 0.85; }
-      .spark.s9  { --dx: -36px; --dy: -44px; --scale: 1.20; }
-      .spark.s10 { --dx: 22px;  --dy: -60px; --scale: 1.00; }
-      .spark.s11 { --dx: -22px; --dy: -58px; --scale: 1.05; }
-      .spark.s12 { --dx: 0px;   --dy: -30px; --scale: 1.35; }
+      .spark.s1  { --dx: 0px;   --dy: -75px; --scale: 1.35; }
+      .spark.s2  { --dx: 52px;  --dy: -55px; --scale: 1.05; }
+      .spark.s3  { --dx: 74px;  --dy: -12px; --scale: 1.25; }
+      .spark.s4  { --dx: 58px;  --dy: 38px;  --scale: 0.95; }
+      .spark.s5  { --dx: 16px;  --dy: 70px;  --scale: 1.15; }
+      .spark.s6  { --dx: -22px; --dy: 72px;  --scale: 1.00; }
+      .spark.s7  { --dx: -60px; --dy: 36px;  --scale: 1.20; }
+      .spark.s8  { --dx: -76px; --dy: -15px; --scale: 0.95; }
+      .spark.s9  { --dx: -50px; --dy: -58px; --scale: 1.30; }
+      .spark.s10 { --dx: 30px;  --dy: -80px; --scale: 1.10; }
+      .spark.s11 { --dx: -30px; --dy: -78px; --scale: 1.15; }
+      .spark.s12 { --dx: 0px;   --dy: -42px; --scale: 1.45; }
 
       @keyframes sparkRadiate {
         0% {
@@ -1512,57 +1576,43 @@
         }
       }
 
-      /* Text and Badges */
+      /* Text and Badges on Fullscreen Blur */
+      .cheers-text-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
       .cheers-badge-pill {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        background: linear-gradient(135deg, #f39c12, #e67e22);
-        color: #ffffff;
-        font-size: 0.76rem;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(254, 211, 48, 0.28), rgba(243, 156, 18, 0.45));
+        border: 1.5px solid rgba(254, 211, 48, 0.7);
+        color: #fed330;
+        font-size: 0.85rem;
         font-weight: 800;
-        letter-spacing: 0.5px;
-        padding: 5px 14px;
-        border-radius: 20px;
-        box-shadow: 0 4px 12px rgba(243, 156, 18, 0.35);
-        margin-bottom: 6px;
+        letter-spacing: 1.5px;
+        padding: 6px 18px;
+        border-radius: 999px;
+        box-shadow: 0 4px 18px rgba(243, 156, 18, 0.35);
+        margin-bottom: 10px;
         text-transform: uppercase;
+        backdrop-filter: blur(8px);
       }
       .cheers-title {
-        font-size: 1.32rem;
-        font-weight: 800;
-        color: #2d3436;
-        margin: 0 0 4px;
-        letter-spacing: -0.3px;
+        font-size: 2.1rem;
+        font-weight: 900;
+        color: #ffffff;
+        margin: 0 0 6px;
+        letter-spacing: -0.5px;
+        text-shadow: 0 4px 25px rgba(254, 211, 48, 0.45), 0 2px 10px rgba(0, 0, 0, 0.8);
       }
       .cheers-subtitle {
-        font-size: 0.82rem;
+        font-size: 1.02rem;
         font-weight: 600;
-        color: #636e72;
+        color: rgba(255, 255, 255, 0.9);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
         margin: 0;
-      }
-
-      /* Quick test cheers button in drunk modal */
-      .drunk-cheers-quick-btn {
-        margin-top: 8px;
-        background: rgba(243, 156, 18, 0.12);
-        color: #d35400;
-        border: 1px dashed rgba(243, 156, 18, 0.4);
-        border-radius: 12px;
-        padding: 8px 12px;
-        font-size: 0.78rem;
-        font-weight: 800;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        width: 100%;
-        transition: transform 0.12s ease, background 0.15s ease;
-      }
-      .drunk-cheers-quick-btn:active {
-        transform: scale(0.96);
-        background: rgba(243, 156, 18, 0.22);
       }
 
       /* Motion Permission Banner (iOS Safari / Streamlit Iframe) */
@@ -1618,7 +1668,12 @@
     <canvas id="beer-canvas" aria-hidden="true"></canvas>
 
     <!-- Bump Active Connecting Ring (Attivo durante lo shake per connettersi con smartphone vicini) -->
-    <div id="bump-active-ring" aria-hidden="true"></div>
+    <div id="bump-active-ring" aria-hidden="true">
+      <div class="bump-active-badge">
+        <span class="bump-radar-dot"></span>
+        <span>Cerca Cin-Cin attivo</span>
+      </div>
+    </div>
 
     <div id="calibration-overlay">
       <div id="calib-icon-container">
@@ -1763,11 +1818,6 @@
             </button>
           </div>
 
-          <button id="btn-test-cheers" class="drunk-cheers-quick-btn" type="button" title="Testa il brindisi Cin-Cin Bump">
-            <span>🥂</span>
-            <span>Test Brindisi Cin-Cin</span>
-          </button>
-
           <div class="drunk-toggle-row">
             <div class="drunk-toggle-info">
               <span class="drunk-toggle-label">Effetti Visivi Drunk</span>
@@ -1896,6 +1946,8 @@
     <div id="bump-cheers-modal" class="bump-cheers-modal" aria-hidden="true">
       <div class="cheers-card">
         <div class="cheers-stage" id="cheers-stage">
+          <!-- Golden Impact Flash Shockwave -->
+          <div class="cheers-impact-flash"></div>
           <!-- Glass Left -->
           <div class="cheers-glass-wrapper glass-wrap-left">
             <svg class="cheers-glass-svg" viewBox="0 0 120 180" xmlns="http://www.w3.org/2000/svg">
@@ -3322,8 +3374,6 @@
       if (drunkMinusBtn) drunkMinusBtn.addEventListener("click", removeDrink);
       if (drunkResetBtn) drunkResetBtn.addEventListener("click", resetDrinks);
       if (drunkToggleFxBtn) drunkToggleFxBtn.addEventListener("click", toggleDrunkEffects);
-      const btnTestCheers = document.getElementById("btn-test-cheers");
-      if (btnTestCheers) btnTestCheers.addEventListener("click", () => triggerCheersAnimation());
 
       updateSoundBtnUI();
       updateDrunkUI();
@@ -4296,33 +4346,21 @@
               const now = Date.now();
               const timeDelta = Math.abs(now - (bump.t || 0));
 
-              // Se entrambi hanno coordinate GPS reali, verifica <= 25m.
-              const isDistanceIgnored = bump.ignoreDistance === true || window.__ignoreBumpDistance === true;
+              // Verifica finestra temporale attiva (tolleranza 5.5s per compensare clock skew)
+              const MAX_BUMP_TIME_DELTA = 5500;
+              if (timeDelta > MAX_BUMP_TIME_DELTA) return;
+
+              // Verifica prossimità GPS entro 100 metri
               const hasMyGps = userCoords && typeof userCoords.lat === "number" && typeof userCoords.lon === "number" && (userCoords.lat !== 0 || userCoords.lon !== 0);
               const hasPeerGps = typeof bump.lat === "number" && typeof bump.lon === "number" && (bump.lat !== 0 || bump.lon !== 0);
 
-              const dist = (!isDistanceIgnored && hasMyGps && hasPeerGps)
-                ? getDist(userCoords.lat, userCoords.lon, bump.lat, bump.lon)
-                : 0;
+              if (!hasMyGps || !hasPeerGps) return;
 
-              console.log(`[Cin-Cin Bump] 📡 Ricevuto bump da ${bump.id}. timeDelta: ${timeDelta}ms, dist: ${Math.round(dist)}m, ignoraDistanza: ${isDistanceIgnored}`);
+              const dist = getDist(userCoords.lat, userCoords.lon, bump.lat, bump.lon);
+              const MAX_BUMP_DIST = 100; // Cin-Cin consentito solo entro 100 metri
+              if (dist > MAX_BUMP_DIST) return;
 
-              const MAX_BUMP_TIME_DELTA = 5500; // Tolleranza 5.5s per assorbire clock skew tra due telefoni
-              if (timeDelta > MAX_BUMP_TIME_DELTA) {
-                console.log(`[Cin-Cin Bump] ⏳ Ignorato: scaduto (${timeDelta}ms > ${MAX_BUMP_TIME_DELTA}ms)`);
-                return;
-              }
-
-              // Soglia di prossimità: 25m all'aperto, estesa fino a 80m per assorbire la normale accuratezza GPS indoor (se non ignorata in debug)
-              const MAX_BUMP_DIST = 80;
-              if (!isDistanceIgnored && dist > MAX_BUMP_DIST) {
-                console.log(`[Cin-Cin Bump] 📍 Ignorato: troppo lontano (${Math.round(dist)}m > ${MAX_BUMP_DIST}m, soglia base 25m)`);
-                return;
-              }
-
-              console.log(`[Cin-Cin Bump] 🍻 MATCH CONVALIDATO con ${bump.id}!`);
-
-              // Notifica istantanea all'altro dispositivo scrivendo sul suo nodo
+              // Match convalidato: notifica istantanea all'altro dispositivo scrivendo sul suo nodo
               snapshot.ref.child("matched").set(myClientId).catch(() => {});
 
               // Rimuovi dopo 1.5s per pulire il database
@@ -4339,7 +4377,7 @@
         }
       }
 
-      function publishBumpEvent(options = {}) {
+      function publishBumpEvent() {
         showBumpActiveRing();
 
         // Feedback aptico leggero immediato sullo shake
@@ -4347,9 +4385,6 @@
 
         const lat = (userCoords && typeof userCoords.lat === "number") ? userCoords.lat : 0;
         const lon = (userCoords && typeof userCoords.lon === "number") ? userCoords.lon : 0;
-        const ignoreDistance = (options && options.ignoreDistance === true) || window.__ignoreBumpDistance === true;
-
-        console.log(`[Cin-Cin Bump] 📱 Bump pubblicato (ID: ${myClientId}, lat: ${lat}, lon: ${lon}, ignoraDistanza: ${ignoreDistance})`);
 
         if (activeBumpsRef) {
           try {
@@ -4365,15 +4400,13 @@
               id: myClientId,
               lat: lat,
               lon: lon,
-              t: Date.now(),
-              ignoreDistance: ignoreDistance
+              t: Date.now()
             });
 
             // Ascolta se l'altro dispositivo convalida il nostro bump (handshake bidirezionale)
             newBumpRef.child("matched").on("value", (snap) => {
               const matchedPeer = snap.val();
               if (matchedPeer) {
-                console.log(`[Cin-Cin Bump] 🤝 Match confermato da peer: ${matchedPeer}!`);
                 hideBumpActiveRing();
                 triggerCheersAnimation();
                 setTimeout(() => {
@@ -4401,16 +4434,6 @@
         }
       }
 
-      // Funzione di debug richiamabile da console per simulare lo shake da PC ignorando la distanza GPS
-      function debugShake(ignoreDistance = true) {
-        window.__ignoreBumpDistance = ignoreDistance;
-        console.log(`%c[Cin-Cin Debug] 🚀 Shake simulato (ignoraDistanza = ${ignoreDistance})`, "color: #fed330; font-weight: bold; font-size: 13px;");
-        publishBumpEvent({ ignoreDistance: ignoreDistance });
-      }
-
-      window.debugShake = debugShake;
-      window.simulateBump = debugShake;
-      window.testShake = debugShake;
       window.publishBumpEvent = publishBumpEvent;
 
       function handleDeviceMotion(e) {
@@ -4518,8 +4541,6 @@
       // Inizializzazione motion banner e permessi su iOS / Streamlit
       window.addEventListener("DOMContentLoaded", () => {
         initFirebaseBump();
-
-        console.log("%c[Cin-Cin Debug] Per testare lo shake da PC ignorando la distanza scrivi: debugShake()", "color: #fed330; font-weight: bold; font-size: 12px;");
 
         // Acquisizione automatica iniziale posizione per il Bump
         if (navigator.geolocation && !userCoords) {
