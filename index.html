@@ -1308,7 +1308,7 @@
         position: fixed;
         inset: 0;
         pointer-events: none;
-        z-index: 2200;
+        z-index: 0;
         opacity: 0;
         transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         display: flex;
@@ -4262,7 +4262,7 @@
 
               const dist = getDist(userCoords.lat, userCoords.lon, bump.lat, bump.lon);
               const MAX_BUMP_DIST = 100; // Cin-Cin consentito solo entro 100 metri
-              if (dist > MAX_BUMP_DIST) return;
+              if (dist > MAX_BUMP_DIST && window.DEBUG_IGNORE_BUMP_DISTANCE !== true) return;
 
               // ENTRAMBI I TELEFONI STANNO SCUOTENDO E SONO VICINI ENTRO 100M!
               // Interrompi immediatamente la finestra di tolleranza locale
@@ -4451,6 +4451,10 @@
       // Esponi per test e debug manuale
       window.triggerCheersAnimation = triggerCheersAnimation;
       window.testBumpCinCin = triggerCheersAnimation;
+      window.testBumpIgnoreDistance = function() {
+        window.DEBUG_IGNORE_BUMP_DISTANCE = true;
+        console.log("Distanza GPS ignorata. I telefoni si connetteranno col prossimo shake, indipendentemente dalla distanza!");
+      };
 
       // Inizializzazione motion banner e permessi su iOS / Streamlit
       window.addEventListener("DOMContentLoaded", () => {
