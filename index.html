@@ -4307,28 +4307,44 @@
       let isMotionListening = false;
       let cheersCloseTimer = null;
 
-      // Gestione del ring radar attorno allo schermo durante lo shake
-      let bumpRingTimer = null;
-      const BUMP_ACTIVE_WINDOW = 4000; // Finestra attiva di 4s per garantire sincronizzazione tra dispositivi e compensare i clock
+      // Gestione del ring radar attorno allo schermo e stato attivo dello shake
+      let isLocalShakeActive = false;
+      let localShakeActiveTimer = null;
+      const BUMP_ACTIVE_WINDOW = 3500; // Finestra di 3.5s in cui il dispositivo è in ascolto attivo durante lo shake
       let lastFirebaseBumpTime = 0;
       const FIREBASE_BUMP_THROTTLE = 900; // Pubblica su Firebase al massimo ogni 0.9s se lo shake continua
       let myCurrentBumpRef = null;
 
       function showBumpActiveRing() {
         const ring = document.getElementById("bump-active-ring");
-        if (!ring) return;
-        ring.classList.add("active");
-        if (bumpRingTimer) clearTimeout(bumpRingTimer);
-        bumpRingTimer = setTimeout(() => {
-          hideBumpActiveRing();
+        if (ring) ring.classList.add("active");
+
+        isLocalShakeActive = true;
+        if (localShakeActiveTimer) clearTimeout(localShakeActiveTimer);
+        localShakeActiveTimer = setTimeout(() => {
+          stopLocalShakeWindow();
         }, BUMP_ACTIVE_WINDOW);
       }
 
-      function hideBumpActiveRing() {
-        if (bumpRingTimer) clearTimeout(bumpRingTimer);
-        bumpRingTimer = null;
+      function stopLocalShakeWindow() {
+        isLocalShakeActive = false;
+        if (localShakeActiveTimer) {
+          clearTimeout(localShakeActiveTimer);
+          localShakeActiveTimer = null;
+        }
         const ring = document.getElementById("bump-active-ring");
         if (ring) ring.classList.remove("active");
+
+        // Rimuove immediatamente il proprio record per chiudere la finestra di tolleranza
+        if (myCurrentBumpRef) {
+          myCurrentBumpRef.off();
+          myCurrentBumpRef.remove().catch(() => {});
+          myCurrentBumpRef = null;
+        }
+      }
+
+      function hideBumpActiveRing() {
+        stopLocalShakeWindow();
       }
 
       function initFirebaseBump() {
@@ -4343,14 +4359,20 @@
               const bump = snapshot.val();
               if (!bump || !bump.id || bump.id === myClientId) return;
 
+              // 1. ENTRAMBI I TELEFONI DEVONO ESSERE SCUOTUTI:
+              // Se questo telefono NON sta scuotendo (isLocalShakeActive è false), ignora il bump!
+              if (!isLocalShakeActive) return;
+
+              // 2. Se l'animazione o il cooldown è in corso, non accettare altri bump
+              if (isCheersInProgress) return;
+
               const now = Date.now();
               const timeDelta = Math.abs(now - (bump.t || 0));
 
-              // Verifica finestra temporale attiva (tolleranza 5.5s per compensare clock skew)
-              const MAX_BUMP_TIME_DELTA = 5500;
-              if (timeDelta > MAX_BUMP_TIME_DELTA) return;
+              // 3. Verifica finestra temporale attiva
+              if (timeDelta > BUMP_ACTIVE_WINDOW) return;
 
-              // Verifica prossimità GPS entro 100 metri
+              // 4. Verifica prossimità GPS entro 100 metri
               const hasMyGps = userCoords && typeof userCoords.lat === "number" && typeof userCoords.lon === "number" && (userCoords.lat !== 0 || userCoords.lon !== 0);
               const hasPeerGps = typeof bump.lat === "number" && typeof bump.lon === "number" && (bump.lat !== 0 || bump.lon !== 0);
 
@@ -4360,15 +4382,18 @@
               const MAX_BUMP_DIST = 100; // Cin-Cin consentito solo entro 100 metri
               if (dist > MAX_BUMP_DIST) return;
 
-              // Match convalidato: notifica istantanea all'altro dispositivo scrivendo sul suo nodo
+              // ENTRAMBI I TELEFONI STANNO SCUOTENDO E SONO VICINI ENTRO 100M!
+              // Interrompi immediatamente la finestra di tolleranza locale
+              stopLocalShakeWindow();
+
+              // Notifica istantanea all'altro dispositivo scrivendo sul suo nodo
               snapshot.ref.child("matched").set(myClientId).catch(() => {});
 
-              // Rimuovi dopo 1.5s per pulire il database
+              // Rimuovi il record dell'altro peer dopo 1.2s per lasciare il tempo all'altro di confermare
               setTimeout(() => {
                 snapshot.ref.remove().catch(() => {});
-              }, 1500);
+              }, 1200);
 
-              hideBumpActiveRing();
               triggerCheersAnimation();
             });
           }
@@ -4407,11 +4432,9 @@
             newBumpRef.child("matched").on("value", (snap) => {
               const matchedPeer = snap.val();
               if (matchedPeer) {
-                hideBumpActiveRing();
+                // Interrompi immediatamente la finestra di tolleranza locale
+                stopLocalShakeWindow();
                 triggerCheersAnimation();
-                setTimeout(() => {
-                  newBumpRef.remove().catch(() => {});
-                }, 1000);
               }
             });
 
@@ -4503,9 +4526,10 @@
       function triggerCheersAnimation() {
         if (isCheersInProgress) return;
         isCheersInProgress = true;
-        setTimeout(() => { isCheersInProgress = false; }, 3200);
+        setTimeout(() => { isCheersInProgress = false; }, 3500);
 
-        hideBumpActiveRing();
+        // Interrompi immediatamente la finestra di ascolto dello shake e rimuovi il record
+        stopLocalShakeWindow();
 
         const modal = document.getElementById("bump-cheers-modal");
         if (!modal) return;
